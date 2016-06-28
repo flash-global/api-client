@@ -1,4 +1,4 @@
 Pricer Framework
 ================
 
-The Pricer Framework holds the core component of FEI applications.
+The Pricer Framework holds the core components of FEI applications.

@@ -1,0 +1,19 @@
+{
+  "name": "neofox/webclients",
+  "authors": [
+    {
+      "name": "Jerome Schaeffer",
+      "email": "jsc@opcoding.eu"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Pricer\\WebClient\\": "src/"
+    }
+  },
+  "require": {
+    "guzzle/guzzle": "^3.9",
+    "amphp/artax": "^2.0",
+    "codeception/codeception": "^2.2"
+  }
+}

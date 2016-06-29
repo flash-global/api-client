@@ -1,6 +1,6 @@
 {
-  "name": "fei/framework",
-  "description": "FEI Business components",
+  "name": "fei/api-client",
+  "description": "FEI client side API helpers",
   "type": "library",
   "license": "Proprietary",
   "require": {

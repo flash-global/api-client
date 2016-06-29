@@ -116,7 +116,7 @@
          * @param string $key
          * @param string $value
          */
-        public function addParam(string $key, string $value)
+        public function addParam($key, $value)
         {
             $this->params[$key] = $value;
         }
@@ -125,7 +125,7 @@
          * @param string $key
          * @return mixed
          */
-        public function getParam(string $key)
+        public function getParam($key)
         {
             return $this->params[$key];
         }
@@ -134,7 +134,7 @@
          * @param string $key
          * @param string $value
          */
-        public function addBodyParam(string $key, string $value)
+        public function addBodyParam($key, $value)
         {
             $this->bodyParams[$key] = $value;
         }
@@ -143,7 +143,7 @@
          * @param string $key
          * @return mixed
          */
-        public function getBodyParam(string $key)
+        public function getBodyParam($key)
         {
             return $this->bodyParams[$key];
         }
@@ -152,7 +152,7 @@
          * @param string $key
          * @param string $value
          */
-        public function addHeader(string $key, string $value)
+        public function addHeader($key, $value)
         {
             $this->headers[$key] = $value;
         }
@@ -161,7 +161,7 @@
          * @param string $key
          * @return mixed
          */
-        public function getHeader(string $key)
+        public function getHeader($key)
         {
             return $this->headers[$key];
         }

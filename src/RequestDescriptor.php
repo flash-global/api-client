@@ -9,12 +9,28 @@
         
         protected $method;
         
-        protected $params  = [];
+        protected $params = array();
         
-        protected $body    = [];
-        
-        protected $headers = [];
-        
+        protected $bodyParams = array();
+
+        protected $headers = array();
+
+        /**
+         * @return array
+         */
+        public function getBodyParams()
+        {
+            return $this->bodyParams;
+        }
+
+        /**
+         * @param array $bodyParams
+         */
+        public function setBodyParams($bodyParams)
+        {
+            $this->bodyParams = $bodyParams;
+        }
+
         /**
          * @return mixed
          */
@@ -95,6 +111,59 @@
             
             return $this;
         }
-        
-        
+
+        /**
+         * @param string $key
+         * @param string $value
+         */
+        public function addParam(string $key, string $value)
+        {
+            $this->params[$key] = $value;
+        }
+
+        /**
+         * @param string $key
+         * @return mixed
+         */
+        public function getParam(string $key)
+        {
+            return $this->params[$key];
+        }
+
+        /**
+         * @param string $key
+         * @param string $value
+         */
+        public function addBodyParam(string $key, string $value)
+        {
+            $this->bodyParams[$key] = $value;
+        }
+
+        /**
+         * @param string $key
+         * @return mixed
+         */
+        public function getBodyParam(string $key)
+        {
+            return $this->bodyParams[$key];
+        }
+
+        /**
+         * @param string $key
+         * @param string $value
+         */
+        public function addHeader(string $key, string $value)
+        {
+            $this->headers[$key] = $value;
+        }
+
+        /**
+         * @param string $key
+         * @return mixed
+         */
+        public function getHeader(string $key)
+        {
+            return $this->headers[$key];
+        }
+
     }

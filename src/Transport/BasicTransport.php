@@ -86,7 +86,7 @@
 
             } catch (\Exception $exception)
             {
-                throw new ApiClientException('An error occured while transporting a request', $exception->getCode(), $exception);
+                throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
             }
 
             return $response;

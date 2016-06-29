@@ -1,7 +1,8 @@
 {
-  "name": "fei/pricer-framework",
+  "name": "fei/framework",
   "description": "FEI Business components",
   "type": "library",
+  "license": "Proprietary",
   "require": {
     "guzzle/guzzle": "^3.9",
     "amphp/artax": "^2.0"
@@ -9,5 +10,9 @@
   "require-dev": {
     "codeception/codeception": "^2.2"
   },
-  "license": "Proprietary"
+  "autoload": {
+    "psr-4": {
+      "Fei\\ApiClient\\": "src/"
+    }
+  }
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace Test\Pricer\WebClient\Transport;
+namespace Test\Fei\ApiClient\Transport;
 
-use Pricer\WebClient\Transport\AsyncTransport;
-use Pricer\WebClient\Transport\BasicTransport;
+use Fei\ApiClient\Transport\AsyncTransport;
+use Fei\ApiClient\Transport\BasicTransport;
 
 class TransportTest extends \Codeception\Test\Unit
 {
@@ -49,7 +49,7 @@ class TransportTest extends \Codeception\Test\Unit
         $this->tester->assertThrows(function () use ($transport) {
             $class = new \stdClass();
             $transport->send($class);
-        }, 'Exception', 'An exception as to be thrown.');
+        }, 'Exception');
 
         $response = $transport->send($request);
 

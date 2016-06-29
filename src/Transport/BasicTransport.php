@@ -9,7 +9,7 @@
     namespace Fei\ApiClient\Transport;
 
 
-    use Fei\ApiClient\Request;
+    use Fei\ApiClient\RequestDescriptor;
 
     use Guzzle\Http\Message\RequestInterface;
 
@@ -109,14 +109,14 @@
         }
 
         /**
-         * @param Request $request
+         * @param RequestDescriptor $request
          *
          * @return Response
          * @throws \Exception
          */
-        public function send(Request $request)
+        public function send(RequestDescriptor $request)
         {
-            if ((!$request instanceof Request) && (!is_array($request)))
+            if ((!$request instanceof RequestDescriptor) && (!is_array($request)))
             {
                 throw new ApiClientException(sprintf('BasicTransport needs an %s object. Instance of %s given.',
                     '\Guzzle\Http\Message\Request', get_class($request)));

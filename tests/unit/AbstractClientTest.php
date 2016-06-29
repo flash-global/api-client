@@ -5,7 +5,7 @@ namespace Tests\Fei\ApiClient;
 use AspectMock\Test;
 use Codeception\Test\Unit;
 use Fei\ApiClient\AbstractApiClient;
-use Fei\ApiClient\Request;
+use Fei\ApiClient\RequestDescriptor;
 use Fei\ApiClient\Transport\TransportInterface;
 use UnitTester;
 
@@ -59,7 +59,7 @@ class ClientTest extends Unit
 
 
         // PREPARE
-        $request   = $this->createMock(Request::class);
+        $request   = $this->createMock(RequestDescriptor::class);
         $transport = $this->createMock(TransportInterface::class);
         $transport->expects($this->never())->method('send')->with($request);
         $client->setTransport($transport);
@@ -77,7 +77,7 @@ class ClientTest extends Unit
     {
         // PREPARE & ASSERT
         $client = new TestClient();
-        $request = $this->createMock(Request::class);
+        $request = $this->createMock(RequestDescriptor::class);
         $transport = $this->createMock(TransportInterface::class);
         $transport->expects($this->once())->method('send')->with($request);
         $client->setTransport($transport);

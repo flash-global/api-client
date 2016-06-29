@@ -13,7 +13,7 @@ use Amp\Artax\Client as AmpClient;
 use Amp\Artax\Request as AmpRequest;
 use Amp\Promise;
 use Fei\ApiClient\ApiClientException;
-use Fei\ApiClient\Request;
+use Fei\ApiClient\RequestDescriptor;
 
 /**
  * Class AsyncTransport
@@ -39,7 +39,7 @@ class AsyncTransport implements TransportInterface
      * @param       $to
      * @param array $headers
      *
-     * @return Request
+     * @return RequestDescriptor
      */
     public function post($data, $to, $headers = array())
     {
@@ -57,7 +57,7 @@ class AsyncTransport implements TransportInterface
      * @param       $from
      * @param array $headers
      *
-     * @return Request
+     * @return RequestDescriptor
      */
     public function get($from, $headers = array())
     {
@@ -108,9 +108,9 @@ class AsyncTransport implements TransportInterface
      * @return Promise
      * @throws ApiClientException
      */
-    public function send(Request $request)
+    public function send(RequestDescriptor $request)
     {
-        if (!$request instanceof Request) {
+        if (!$request instanceof RequestDescriptor) {
             throw new ApiClientException(sprintf('AsyncTransport needs an %s instance. Instance of %s given.',
                 'Amp\Artax\Request', get_class($request)));
         }

@@ -88,11 +88,11 @@
         }
 
         /**
-         * @param Request $request
+         * @param RequestDescriptor $request
          *
          * @return Transport\Response
          */
-        public function send(Request $request)
+        public function send(RequestDescriptor $request)
         {
             if($this->stackNext)
             {

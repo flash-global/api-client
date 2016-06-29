@@ -3,16 +3,18 @@
     namespace Fei\ApiClient;
     
     
-    class Request
+    class RequestDescriptor
     {
         protected $url;
-
+        
         protected $method;
-
-        protected $params;
-
-        protected $body;
-
+        
+        protected $params  = [];
+        
+        protected $body    = [];
+        
+        protected $headers = [];
+        
         /**
          * @return mixed
          */
@@ -20,7 +22,7 @@
         {
             return $this->url;
         }
-
+        
         /**
          * @param mixed $url
          *
@@ -29,10 +31,10 @@
         public function setUrl($url)
         {
             $this->url = $url;
-
+            
             return $this;
         }
-
+        
         /**
          * @return mixed
          */
@@ -40,7 +42,7 @@
         {
             return $this->method;
         }
-
+        
         /**
          * @param mixed $method
          *
@@ -49,49 +51,50 @@
         public function setMethod($method)
         {
             $this->method = $method;
-
+            
             return $this;
         }
-
+        
+        
         /**
-         * @return mixed
+         * @return array
          */
         public function getParams()
         {
             return $this->params;
         }
-
+        
         /**
-         * @param mixed $params
+         * @param array $params
          *
          * @return $this
          */
         public function setParams($params)
         {
             $this->params = $params;
-
+            
             return $this;
         }
-
+        
         /**
-         * @return mixed
+         * @return array
          */
-        public function getBody()
+        public function getHeaders()
         {
-            return $this->body;
+            return $this->headers;
         }
-
+        
         /**
-         * @param mixed $body
+         * @param array $headers
          *
          * @return $this
          */
-        public function setBody($body)
+        public function setHeaders($headers)
         {
-            $this->body = $body;
-
+            $this->headers = $headers;
+            
             return $this;
         }
-
+        
         
     }

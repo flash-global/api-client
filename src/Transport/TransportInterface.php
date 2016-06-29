@@ -8,7 +8,7 @@
 
     namespace Fei\ApiClient\Transport;
 
-    use Fei\ApiClient\Request;
+    use Fei\ApiClient\RequestDescriptor;
 
 
     /**
@@ -23,7 +23,7 @@
          *
          * @return Response
          */
-        public function send(Request $request);
+        public function send(RequestDescriptor $request);
 
 
     }

@@ -1,106 +1,135 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Neofox
- * Date: 21/06/2016
- * Time: 10:31
- */
+    /**
+     * Created by PhpStorm.
+     * User: Neofox
+     * Date: 21/06/2016
+     * Time: 10:31
+     */
 
-namespace Fei\ApiClient\Transport;
+    namespace Fei\ApiClient\Transport;
 
 
-use Guzzle\Http\Message\Request;
-use Guzzle\Http\Message\RequestInterface;
-use Guzzle\Http\Message\Response;
-use Guzzle\Service\Client;
-use Fei\ApiClient\ApiClientException;
+    use Fei\ApiClient\Request;
 
-/**
- * Class BasicTransport
- * @package Fei\ApiClient\Transport
- */
-class BasicTransport extends AbstractTransport
-{
+    use Guzzle\Http\Message\RequestInterface;
+
+    use Guzzle\Service\Client;
+    use Fei\ApiClient\ApiClientException;
 
     /**
-     * BasicTransport constructor.
+     * Class BasicTransport
      *
-     * @param array $options
+     * @package Fei\ApiClient\Transport
      */
-    public function __construct($options = array())
+    class BasicTransport implements TransportInterface
     {
-        /** @var Client client */
-        $this->client = new Client();
-        $this->client->options(null, $options);
-    }
 
-    /**
-     * @param       $data
-     * @param       $to
-     * @param array $headers
-     *
-     * @return \Guzzle\Http\Message\Request|RequestInterface
-     * @throws \Exception
-     */
-    public function post($data, $to, $headers = array())
-    {
-        $request = $this->client->createRequest('POST', $to, $headers, $data);
+        protected $client;
 
-        return $request;
-    }
+        /**
+         * BasicTransport constructor.
+         *
+         * @param array $options
+         */
+        public function __construct($options = [])
+        {
+            /** @var Client client */
+            $this->client = new Client();
+            $this->client->options(null, $options);
+        }
 
-    /**
-     * @param       $from
-     * @param array $headers
-     *
-     * @return \Guzzle\Http\Message\Request|RequestInterface
-     * @throws \Exception
-     */
-    public function get($from, $headers = array())
-    {
-        $request = $this->client->createRequest('GET', $from, $headers);
+        /**
+         * @return Client
+         */
+        public function getClient()
+        {
+            return $this->client;
+        }
 
-        return $request;
-    }
+        /**
+         * @param Client $client
+         *
+         * @return $this
+         */
+        public function setClient($client)
+        {
+            $this->client = $client;
 
-    /**
-     * @param array $data
-     * @param       $to
-     * @param array $headers
-     *
-     * @return mixed
-     * @throws \Exception
-     */
-    public function sendMany($data, $to = null, $headers = array())
-    {
-        foreach ($data as $request) {
-            if (!$request instanceof RequestInterface) {
-                throw new ApiClientException("data must be an array of RequestInterface.");
+            return $this;
+        }
+
+        /**
+         * @param       $data
+         * @param       $to
+         * @param array $headers
+         *
+         * @return \Guzzle\Http\Message\Request|RequestInterface
+         * @throws \Exception
+         */
+        public function post($data, $to, $headers = [])
+        {
+            $request = $this->client->createRequest('POST', $to, $headers, $data);
+
+            return $request;
+        }
+
+        /**
+         * @param       $from
+         * @param array $headers
+         *
+         * @return \Guzzle\Http\Message\Request|RequestInterface
+         * @throws \Exception
+         */
+        public function get($from, $headers = [])
+        {
+            $request = $this->client->createRequest('GET', $from, $headers);
+
+            return $request;
+        }
+
+        /**
+         * @param array $data
+         * @param       $to
+         * @param array $headers
+         *
+         * @return mixed
+         * @throws \Exception
+         */
+        public function sendMany($data, $to = null, $headers = [])
+        {
+            foreach ($data as $request)
+            {
+                if (!$request instanceof RequestInterface)
+                {
+                    throw new ApiClientException("data must be an array of RequestInterface.");
+                }
             }
+
+            return $this->send($data);
         }
 
-        return $this->send($data);
+        /**
+         * @param Request $request
+         *
+         * @return Response
+         * @throws \Exception
+         */
+        public function send(Request $request)
+        {
+            if ((!$request instanceof Request) && (!is_array($request)))
+            {
+                throw new ApiClientException(sprintf('BasicTransport needs an %s object. Instance of %s given.',
+                    '\Guzzle\Http\Message\Request', get_class($request)));
+            }
+            try
+            {
+                $response = $this->client->send($request);
+
+            } catch (\Exception $exception)
+            {
+                throw $exception;
+            }
+
+            return $response;
+        }
     }
-
-    /**
-     * @param \Guzzle\Http\Message\Request $data
-     *
-     * @return Response|null
-     * @throws \Exception
-     */
-    public function send($data)
-    {
-        if ((!$data instanceof Request) && (!is_array($data))) {
-            throw new ApiClientException(sprintf('BasicTransport needs an %s object. Instance of %s given.',
-                '\Guzzle\Http\Message\Request', get_class($data)));
-        }
-        try {
-            $response = $this->client->send($data);
-
-        } catch (\Exception $exception) {
-            throw $exception;
-        }
-
-        return $response;
-    }
-}

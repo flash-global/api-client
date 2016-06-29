@@ -8,7 +8,8 @@
     "amphp/artax": "^2.0"
   },
   "require-dev": {
-    "codeception/codeception": "^2.2"
+    "codeception/codeception": "^2.2",
+    "codeception/aspect-mock": "*"
   },
   "autoload": {
     "psr-4": {

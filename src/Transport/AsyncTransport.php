@@ -9,16 +9,17 @@
 namespace Fei\ApiClient\Transport;
 
 
-use Amp\Artax\Client;
-use Amp\Artax\Request;
+use Amp\Artax\Client as AmpClient;
+use Amp\Artax\Request as AmpRequest;
 use Amp\Promise;
 use Fei\ApiClient\ApiClientException;
+use Fei\ApiClient\Request;
 
 /**
  * Class AsyncTransport
  * @package Fei\ApiClient\Transport
  */
-class AsyncTransport extends AbstractTransport
+class AsyncTransport implements TransportInterface
 {
 
     /**
@@ -29,7 +30,7 @@ class AsyncTransport extends AbstractTransport
     public function __construct($options = array())
     {
         /** @var Client $client */
-        $this->client = new Client();
+        $this->client = new AmpClient();
         $this->client->setAllOptions($options);
     }
 
@@ -42,7 +43,7 @@ class AsyncTransport extends AbstractTransport
      */
     public function post($data, $to, $headers = array())
     {
-        $request = new Request();
+        $request = new AmpRequest();
         $request
             ->setUri($to)
             ->setMethod('POST')
@@ -60,7 +61,7 @@ class AsyncTransport extends AbstractTransport
      */
     public function get($from, $headers = array())
     {
-        $request = new Request();
+        $request = new AmpRequest();
         $request
             ->setUri($from)
             ->setMethod('GET')
@@ -80,7 +81,7 @@ class AsyncTransport extends AbstractTransport
     public function sendMany($data, $to = null, $headers = array())
     {
         foreach ($data as $request) {
-            if (!$request instanceof Request) {
+            if (!$request instanceof AmpRequest) {
                 throw new ApiClientException(sprintf("%s is not an instance of %s. It can't be sent.", get_class($request),
                     'Amp\Artax\Request'));
             }
@@ -89,7 +90,7 @@ class AsyncTransport extends AbstractTransport
         if (!empty($to)) {
             $requests = array();
             foreach ($data as $request) {
-                if ($request instanceof Request) {
+                if ($request instanceof AmpRequest) {
                     $requests[] = $request->setUri($to);
                 }
             }
@@ -102,19 +103,19 @@ class AsyncTransport extends AbstractTransport
     }
 
     /**
-     * @param $data
+     * @param $request
      *
      * @return Promise
      * @throws ApiClientException
      */
-    public function send($data)
+    public function send(Request $request)
     {
-        if (!$data instanceof Request) {
+        if (!$request instanceof Request) {
             throw new ApiClientException(sprintf('AsyncTransport needs an %s instance. Instance of %s given.',
-                'Amp\Artax\Request', get_class($data)));
+                'Amp\Artax\Request', get_class($request)));
         }
 
         // No need to try catch here, Client::request() method itself will never throw
-        return $this->client->request($data);
+        return $this->client->request($request);
     }
 }

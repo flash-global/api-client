@@ -23,6 +23,7 @@ class TransportTest extends \Codeception\Test\Unit
 
     public function testBasicTransport()
     {
+        $this->markTestSkipped();
         $transport = new BasicTransport();
 
         $this->tester->wantTo('get request');
@@ -73,7 +74,9 @@ class TransportTest extends \Codeception\Test\Unit
     }
 
 
-    public function testAsyncTransport(){
+    public function testAsyncTransport()
+    {
+        $this->markTestSkipped();
 
         $transport = new AsyncTransport();
 

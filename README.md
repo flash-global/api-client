@@ -1,4 +1,4 @@
-APi Client
+Api Client
 ==========
 
 Low level api client

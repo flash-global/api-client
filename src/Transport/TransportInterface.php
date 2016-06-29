@@ -9,6 +9,7 @@
     namespace Fei\ApiClient\Transport;
 
     use Fei\ApiClient\RequestDescriptor;
+    use Fei\ApiClient\Response;
 
 
     /**
@@ -19,11 +20,12 @@
     interface TransportInterface
     {
         /**
-         * @param $request
+         * @param RequestDescriptor $requestDescriptor
+         * @param int               $flags     Options binary flags
          *
          * @return Response
          */
-        public function send(RequestDescriptor $request);
+        public function send(RequestDescriptor $requestDescriptor, $flags = 0);
 
 
     }

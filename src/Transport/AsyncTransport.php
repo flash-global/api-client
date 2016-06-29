@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Neofox
- * Date: 21/06/2016
- * Time: 10:31
- */
 
 namespace Fei\ApiClient\Transport;
 
@@ -103,19 +97,21 @@ class AsyncTransport implements TransportInterface
     }
 
     /**
-     * @param $request
+     * @param RequestDescriptor $requestDescriptor
+     *
+     * @param int               $flags
      *
      * @return Promise
      * @throws ApiClientException
      */
-    public function send(RequestDescriptor $request)
+    public function send(RequestDescriptor $requestDescriptor, $flags = 0)
     {
-        if (!$request instanceof RequestDescriptor) {
+        if (!$requestDescriptor instanceof RequestDescriptor) {
             throw new ApiClientException(sprintf('AsyncTransport needs an %s instance. Instance of %s given.',
-                'Amp\Artax\Request', get_class($request)));
+                'Amp\Artax\Request', get_class($requestDescriptor)));
         }
 
         // No need to try catch here, Client::request() method itself will never throw
-        return $this->client->request($request);
+        return $this->client->request($requestDescriptor);
     }
 }

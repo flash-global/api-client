@@ -10,9 +10,7 @@
 
 
     use Fei\ApiClient\RequestDescriptor;
-
-    use Guzzle\Http\Message\RequestInterface;
-
+    use Fei\ApiClient\Response;
     use Guzzle\Service\Client;
     use Fei\ApiClient\ApiClientException;
 
@@ -23,19 +21,21 @@
      */
     class BasicTransport implements TransportInterface
     {
-
+        /**
+         * @var Client
+         */
         protected $client;
+
+        protected $clientOptions = array();
 
         /**
          * BasicTransport constructor.
          *
          * @param array $options
          */
-        public function __construct($options = [])
+        public function __construct($options = array())
         {
-            /** @var Client client */
-            $this->client = new Client();
-            $this->client->options(null, $options);
+            $this->clientOptions = $options;
         }
 
         /**
@@ -43,6 +43,11 @@
          */
         public function getClient()
         {
+            if(is_null($this->client))
+            {
+                $this->client = new Client($this->clientOptions);
+            }
+            
             return $this->client;
         }
 
@@ -58,76 +63,30 @@
             return $this;
         }
 
+
         /**
-         * @param       $data
-         * @param       $to
-         * @param array $headers
+         * @param RequestDescriptor $requestDescriptor
          *
-         * @return \Guzzle\Http\Message\Request|RequestInterface
-         * @throws \Exception
-         */
-        public function post($data, $to, $headers = [])
-        {
-            $request = $this->client->createRequest('POST', $to, $headers, $data);
-
-            return $request;
-        }
-
-        /**
-         * @param       $from
-         * @param array $headers
-         *
-         * @return \Guzzle\Http\Message\Request|RequestInterface
-         * @throws \Exception
-         */
-        public function get($from, $headers = [])
-        {
-            $request = $this->client->createRequest('GET', $from, $headers);
-
-            return $request;
-        }
-
-        /**
-         * @param array $data
-         * @param       $to
-         * @param array $headers
-         *
-         * @return mixed
-         * @throws \Exception
-         */
-        public function sendMany($data, $to = null, $headers = [])
-        {
-            foreach ($data as $request)
-            {
-                if (!$request instanceof RequestInterface)
-                {
-                    throw new ApiClientException("data must be an array of RequestInterface.");
-                }
-            }
-
-            return $this->send($data);
-        }
-
-        /**
-         * @param RequestDescriptor $request
+         * @param int               $flags
          *
          * @return Response
+         * @throws ApiClientException
          * @throws \Exception
          */
-        public function send(RequestDescriptor $request)
+        public function send(RequestDescriptor $requestDescriptor, $flags = 0)
         {
-            if ((!$request instanceof RequestDescriptor) && (!is_array($request)))
+            if (!$requestDescriptor instanceof RequestDescriptor)
             {
-                throw new ApiClientException(sprintf('BasicTransport needs an %s object. Instance of %s given.',
-                    '\Guzzle\Http\Message\Request', get_class($request)));
+                throw new ApiClientException(sprintf('BasicTransport expects a RequestDescriptor object. Instance of %s given.', get_class($requestDescriptor)));
             }
             try
             {
+                $request = $this->client->createRequest($requestDescriptor->getMethod(), $requestDescriptor->getUrl(), $requestDescriptor->getHeaders());
                 $response = $this->client->send($request);
 
             } catch (\Exception $exception)
             {
-                throw $exception;
+                throw new ApiClientException('An error occured while transporting a request', $exception->getCode(), $exception);
             }
 
             return $response;

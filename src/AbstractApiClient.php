@@ -32,12 +32,39 @@
         /**
          * @var bool
          */
-        protected $stackNext;
+        protected $delayNext = false;
 
         /**
          * @var array
          */
-        protected $stackedRequests;
+        protected $delayedRequests;
+
+        /**
+         * @var bool
+         */
+        protected $isDelayed = false;
+
+        /**
+         * Forge complete URL
+         *
+         * @param $path string Path part of the URL
+         *
+         * @return string
+         */
+        public function buildUrl($path)
+        {
+            return $this->getBaseUrl() . ltrim($path, '/');
+        }
+
+        /**
+         * Tells client to stack the next request
+         */
+        public function delay()
+        {
+            $this->delayNext = true;
+
+            return $this;
+        }
 
         /**
          * @return TransportInterface
@@ -57,6 +84,41 @@
             $this->transport = $transport;
 
             return $this;
+        }
+
+        /**
+         * @return $this
+         */
+        public function rollback()
+        {
+            $this->isDelayed       = false;
+            $this->delayedRequests = array();
+
+            return $this;
+        }
+
+        /**
+         * @param RequestDescriptor $request
+         *
+         * @param int               $flags
+         *
+         * @return Transport\Response
+         */
+        public function send(RequestDescriptor $request, $flags = 0)
+        {
+            if ($this->delayNext || $this->isDelayed)
+            {
+                $this->delayedRequests[] = [$request, $flags | ApiRequestOption::NO_RESPONSE];
+
+                // reset stackNext flag
+                $this->delayNext = false;
+
+                return null;
+            }
+
+            $response = $this->getTransport()->send($request, $flags);
+
+            return $response;
         }
 
         /**
@@ -80,33 +142,29 @@
         }
 
         /**
-         * Tells client to stack the next request
+         * @return $this
          */
-        public function stack()
+        public function begin()
         {
-            $this->stackNext = true;
+            $this->isDelayed = true;
+
+            return $this;
         }
 
         /**
-         * @param RequestDescriptor $request
          *
-         * @return Transport\Response
          */
-        public function send(RequestDescriptor $request)
+        public function commit()
         {
-            if($this->stackNext)
-            {
-                $this->stackedRequests[] = $request;
+            $this->isDelayed = false;
 
-                // reset stackNext flag
-                $this->stackNext = false;
-    
-                return null;
+            while($params = array_shift($this->delayedRequests))
+            {
+                list($request, $flags) = $params;
+                $this->send($request, $flags);
             }
 
-            $response = $this->getTransport()->send($request);
-
-            return $response;
+            return $this;
         }
 
     }

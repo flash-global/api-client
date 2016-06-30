@@ -11,9 +11,8 @@ setup:
 test:
   codeception:  
     args: unit --coverage-html
+    config: codeception.yml
   technical_debt:
   php_loc:
-  php_cpd:
-      allow_failures: true
   php_mess_detector:
       allow_failures: true

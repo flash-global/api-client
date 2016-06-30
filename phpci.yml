@@ -2,6 +2,7 @@
 build_settings:
   ignore:
     - "vendor"
+    - "tests"
 
 setup:
   composer:
@@ -9,6 +10,7 @@ setup:
 
 test:
   codeception:  
+    args: unit --coverage-html
   technical_debt:
   php_loc:
   php_cpd:

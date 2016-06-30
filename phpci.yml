@@ -7,7 +7,7 @@ setup:
     action: install
 test: 
   codeception: 
-    args: "unit --coverage-html"
+    args: " --coverage-html"
     config: codeception.yml
   php_loc: ~
   php_mess_detector: 

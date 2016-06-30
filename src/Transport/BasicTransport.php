@@ -5,6 +5,7 @@
 
     use Fei\ApiClient\RequestDescriptor;
     use Fei\ApiClient\Response;
+    use Fei\ApiClient\ResponseDescriptor;
     use Guzzle\Service\Client;
     use Fei\ApiClient\ApiClientException;
 
@@ -83,6 +84,12 @@
                 throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
             }
 
-            return $response;
+            $responseDescriptor = new ResponseDescriptor();
+            $responseDescriptor->setBody($response->getBody());
+            $responseDescriptor->setCode($response->getStatusCode());
+            $responseDescriptor->setHeaders($response->getHeaders());
+            
+            
+            return $responseDescriptor;
         }
     }

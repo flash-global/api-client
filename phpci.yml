@@ -13,3 +13,7 @@ test:
   php_mess_detector: 
     allow_failures: true
   technical_debt: ~
+success:
+  shell:
+    - "cd /var/www/satis && php app/bin/satis build --repository-url https://github.com/flash-global/api-client ./config/satis.json web/"
+

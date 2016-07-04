@@ -2,11 +2,11 @@
 
 namespace Tests\Fei\ApiClient;
 
-use AspectMock\Test;
 use Codeception\Test\Unit;
 use Fei\ApiClient\AbstractApiClient;
 use Fei\ApiClient\ApiRequestOption;
 use Fei\ApiClient\RequestDescriptor;
+use Fei\ApiClient\ResponseDescriptor;
 use Fei\ApiClient\Transport\TransportInterface;
 use UnitTester;
 
@@ -94,7 +94,6 @@ class ClientTest extends Unit
 
     public function testUrlForging()
     {
-
         $client = new TestClient();
         $client->setBaseUrl('http://test.com/');
 
@@ -120,6 +119,19 @@ class ClientTest extends Unit
         return $client;
     }
 
+    public function testFetchIsSendingARequest()
+    {
+        $client = new TestClient();
+
+        $request = $this->createMock(RequestDescriptor::class);
+        $response = $this->createMock(ResponseDescriptor::class);
+        $transport = $this->createMock(TransportInterface::class);
+        $transport->expects($this->once())->method('send')->with($request)->willReturn($response);
+        $client->setTransport($transport);
+
+        $entity = $client->fetch($request);
+    }
+
     /**
      * @depends testBeginStartsATransaction
      */
@@ -142,7 +154,6 @@ class ClientTest extends Unit
      */
     public function testCommitResetDelayedRequestsAndStatus()
     {
-
         $client = new TestClient();
         $client->begin();
         $request = $this->createMock(RequestDescriptor::class);
@@ -165,7 +176,4 @@ class ClientTest extends Unit
 
 class TestClient extends AbstractApiClient
 {
-    
-    
-    
 }

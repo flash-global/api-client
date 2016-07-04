@@ -64,7 +64,7 @@
          *
          * @param int               $flags
          *
-         * @return Response
+         * @return ResponseDescriptor
          * @throws ApiClientException
          * @throws \Exception
          */

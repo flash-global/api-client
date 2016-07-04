@@ -59,9 +59,32 @@ class ResponseDescriptorTest extends Unit
         $this->assertEquals('The body',$response->getBody());
         $this->assertAttributeEquals('The body','body',$response);
     }
+
+    public function testDataAccessors()
+    {
+        $response = new TestResponse();
+
+        $this->assertEmpty($response->getData());
+
+        $response->setBody('{"data":[{"id":6,"message":"ere"},{"id":5,"message":"test"}],"meta":{"entity":"aze"}}');
+
+        $this->assertEquals([['id' => 6, 'message' => 'ere'], ['id' => 5, 'message' => 'test']], $response->getData());
+    }
+
+    public function testMetaAccessors()
+    {
+        $response = new TestResponse();
+
+        $this->assertEmpty($response->getMeta());
+
+        $response->setBody(json_encode(['meta' => ['entity' => ResponseDescriptor::class , 'pagination' => ['total' => 42]]]));
+
+        $this->assertEquals(ResponseDescriptor::class, $response->getMeta('entity'));
+        $this->assertEquals(['entity' => ResponseDescriptor::class , 'pagination' => ['total' => 42]], $response->getMeta());
+
+    }
 }
 
 class TestResponse extends ResponseDescriptor
 {
-
 }

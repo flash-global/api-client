@@ -10,6 +10,7 @@
 
 
     use Fei\ApiClient\Transport\TransportInterface;
+    use Fei\Entity\EntityInterface;
 
     /**
      * Class AbstractApiApiClient
@@ -102,7 +103,7 @@
          *
          * @param int               $flags
          *
-         * @return Transport\Response
+         * @return ResponseDescriptor
          */
         public function send(RequestDescriptor $request, $flags = 0)
         {
@@ -119,6 +120,41 @@
             $response = $this->getTransport()->send($request, $flags);
 
             return $response;
+        }
+
+        /**
+         * @param RequestDescriptor $request
+         * @param int               $flags
+         *
+         * @return EntityInterface
+         */
+        public function fetch(RequestDescriptor $request, $flags = 0)
+        {
+            $response = $this->send($request, $flags);
+            $class = $response->getMeta('entity');
+
+            $data = $response->getData();
+            $entity = [];
+
+            if (!empty($class)) {
+
+                if (is_array($data[0])) {
+                    foreach ($data as $resource) {
+
+                        /** @var EntityInterface $entity */
+                        $subEntity = new $class;
+                        $entity->hydrate($resource);
+                        $entity[] = $subEntity;
+                    }
+                } else {
+                    
+                    /** @var EntityInterface $entity */
+                    $entity = new $class;
+                    $entity->hydrate($response->getData());
+                }
+            }
+
+            return $entity;
         }
 
         /**

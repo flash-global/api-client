@@ -10,6 +10,7 @@
 
     use Fei\ApiClient\RequestDescriptor;
     use Fei\ApiClient\Response;
+    use Fei\ApiClient\ResponseDescriptor;
 
 
     /**
@@ -23,7 +24,7 @@
          * @param RequestDescriptor $requestDescriptor
          * @param int               $flags     Options binary flags
          *
-         * @return Response
+         * @return ResponseDescriptor
          */
         public function send(RequestDescriptor $requestDescriptor, $flags = 0);
 

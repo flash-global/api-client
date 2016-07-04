@@ -35,6 +35,7 @@ class BasicTransportTest extends \Codeception\Test\Unit
         $response = $transport->send($requestDescriptor);
 
         $this->assertInstanceOf(ResponseDescriptor::class, $response);
+        $this->assertEquals($client, $transport->getClient());
 
     }
 }

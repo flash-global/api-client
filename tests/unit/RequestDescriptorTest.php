@@ -149,7 +149,6 @@ class RequestDescriptorTest extends Unit
 
 }
 
-class TestRequest extends RequestDescriptor {
-
-
+class TestRequest extends RequestDescriptor
+{
 }

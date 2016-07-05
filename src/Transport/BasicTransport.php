@@ -76,8 +76,8 @@
             }
             try
             {
-                $request = $this->client->createRequest($requestDescriptor->getMethod(), $requestDescriptor->getUrl(), $requestDescriptor->getHeaders());
-                $response = $this->client->send($request);
+                $request = $this->getClient()->createRequest($requestDescriptor->getMethod(), $requestDescriptor->getUrl(), $requestDescriptor->getHeaders(), $requestDescriptor->getBodyParams());
+                $response = $this->getClient()->send($request);
 
             } catch (\Exception $exception)
             {

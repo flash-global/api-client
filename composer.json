@@ -3,19 +3,16 @@
   "description": "FEI client side API helpers",
   "type": "library",
   "license": "Proprietary",
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://composer.flash-global.net"
+    }
+  ],
   "require": {
     "guzzle/guzzle": "^3.9",
     "amphp/artax": "^2.0",
     "fei/entities": "dev-develop"
-  },
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "http://satis.test.flash-global.net"
-    }
-  ],
-  "config": {
-    "secure-http": false
   },
   "require-dev": {
     "codeception/codeception": "^2.2",

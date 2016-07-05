@@ -70,10 +70,6 @@
          */
         public function send(RequestDescriptor $requestDescriptor, $flags = 0)
         {
-            if (!$requestDescriptor instanceof RequestDescriptor)
-            {
-                throw new ApiClientException(sprintf('BasicTransport expects a RequestDescriptor object. Instance of %s given.', get_class($requestDescriptor)));
-            }
             try
             {
                 $request = $this->client->createRequest($requestDescriptor->getMethod(), $requestDescriptor->getUrl(), $requestDescriptor->getHeaders());
@@ -88,7 +84,6 @@
             $responseDescriptor->setBody($response->getBody());
             $responseDescriptor->setCode($response->getStatusCode());
             $responseDescriptor->setHeaders($response->getHeaders());
-            
             
             return $responseDescriptor;
         }

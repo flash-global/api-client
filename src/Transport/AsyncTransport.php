@@ -4,10 +4,16 @@ namespace Fei\ApiClient\Transport;
 
 
 use Amp\Artax\Client as AmpClient;
+use Amp\Artax\FormBody;
 use Amp\Artax\Request as AmpRequest;
+use Amp\Artax\Request;
+use Amp\Artax\Response;
 use Amp\Promise;
 use Fei\ApiClient\ApiClientException;
+use Fei\ApiClient\ApiRequestOption;
 use Fei\ApiClient\RequestDescriptor;
+use Fei\ApiClient\ResponseDescriptor;
+use Fei\Entity\Exception;
 
 /**
  * Class AsyncTransport
@@ -15,85 +21,83 @@ use Fei\ApiClient\RequestDescriptor;
  */
 class AsyncTransport implements TransportInterface
 {
+    /** @var array  */
+    protected $clientOptions = array();
+
+    /** @var  AmpClient */
+    protected $client;
 
     /**
-     * AsyncTransport constructor.
+     * @var array
+     */
+    protected $promises = [];
+
+    /**
+     * BasicTransport constructor.
      *
      * @param array $options
      */
     public function __construct($options = array())
     {
-        /** @var Client $client */
-        $this->client = new AmpClient();
-        $this->client->setAllOptions($options);
+        $this->clientOptions = $options;
     }
 
     /**
-     * @param       $data
-     * @param       $to
-     * @param array $headers
-     *
-     * @return RequestDescriptor
+     * @return AmpClient
      */
-    public function post($data, $to, $headers = array())
+    public function getClient()
     {
-        $request = new AmpRequest();
-        $request
-            ->setUri($to)
-            ->setMethod('POST')
-            ->setBody($data)
-            ->setAllHeaders($headers);
-
-        return $request;
-    }
-
-    /**
-     * @param       $from
-     * @param array $headers
-     *
-     * @return RequestDescriptor
-     */
-    public function get($from, $headers = array())
-    {
-        $request = new AmpRequest();
-        $request
-            ->setUri($from)
-            ->setMethod('GET')
-            ->setAllHeaders($headers);
-
-        return $request;
-    }
-
-    /**
-     * @param       $data
-     * @param       $to
-     * @param array $headers
-     *
-     * @return array[\Amp\Promise]
-     * @throws ApiClientException
-     */
-    public function sendMany($data, $to = null, $headers = array())
-    {
-        foreach ($data as $request) {
-            if (!$request instanceof AmpRequest) {
-                throw new ApiClientException(sprintf("%s is not an instance of %s. It can't be sent.", get_class($request),
-                    'Amp\Artax\Request'));
-            }
+        if(is_null($this->client))
+        {
+            $this->client = new AmpClient();
+            $this->client->setAllOptions($this->clientOptions);
         }
 
-        if (!empty($to)) {
-            $requests = array();
-            foreach ($data as $request) {
-                if ($request instanceof AmpRequest) {
-                    $requests[] = $request->setUri($to);
-                }
+        return $this->client;
+    }
+
+    /**
+     * @param AmpClient $client
+     *
+     * @return $this
+     */
+    public function setClient($client)
+    {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    public function sendMany(array $requestDescriptors)
+    {
+        $requests = array();
+
+        foreach ($requestDescriptors as $requestDescriptor)
+        {
+            list($request, $params) = $requestDescriptor;
+
+            if(!$request instanceof RequestDescriptor)
+            {
+                throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
             }
-        } else {
-            $requests = $data;
+
+            $tempRequest= new Request();
+            $tempRequest->setMethod($request->getMethod())
+                    ->setUri($request->getUrl())
+                    ->setAllHeaders($request->getHeaders())
+                    ->setBody($this->handleBody($request->getBodyParams()))
+            ;
+
+            $requests[] = $tempRequest;
         }
+
 
         // No need to try catch here, Client::request() method itself will never throw
-        return $this->client->requestMulti($requests);
+        $promises =  $this->getClient()->requestMulti($requests);
+
+        $this->promises = array_merge($this->promises, $promises);
+
+        return $promises;
     }
 
     /**
@@ -104,14 +108,56 @@ class AsyncTransport implements TransportInterface
      * @return Promise
      * @throws ApiClientException
      */
-    public function send(RequestDescriptor $requestDescriptor, $flags = 0)
+    public function send(RequestDescriptor $requestDescriptor, $flags = 1)
     {
-        if (!$requestDescriptor instanceof RequestDescriptor) {
-            throw new ApiClientException(sprintf('AsyncTransport needs an %s instance. Instance of %s given.',
-                'Amp\Artax\Request', get_class($requestDescriptor)));
+        $request = new Request();
+        $request->setMethod($requestDescriptor->getMethod())
+            ->setUri($requestDescriptor->getUrl())
+            ->setAllHeaders($requestDescriptor->getHeaders())
+            ->setBody($this->handleBody($requestDescriptor->getBodyParams()))
+        ;
+
+        $promise = $this->getClient()->request($request);
+
+        $responseDescriptor = new ResponseDescriptor();
+
+        if($flags & ApiRequestOption::NO_RESPONSE)
+        {
+            $this->promises[] = $promise;
+            return null;
         }
 
-        // No need to try catch here, Client::request() method itself will never throw
-        return $this->client->request($requestDescriptor);
+        /** @var Response $response */
+        try{
+            $response = \Amp\wait($promise);
+        }catch (\Exception $e){
+            die($request->getBody());
+        }
+
+        $responseDescriptor->setBody($response->getBody());
+        $responseDescriptor->setCode($response->getStatus());
+        $responseDescriptor->setHeaders($response->getAllHeaders());
+
+        return $responseDescriptor;
     }
+
+    protected function handleBody($body)
+    {
+        if(is_array($body))
+        {
+            $handledBody = new FormBody();
+            $handledBody->addFields($body);
+        }else{
+            $handledBody = $body;
+        }
+        return $handledBody;
+
+    }
+
+    function __destruct()
+    {
+       \Amp\wait(\Amp\all($this->promises));
+    }
+
+
 }

@@ -87,4 +87,30 @@
             
             return $responseDescriptor;
         }
+
+        public function sendMany(array $requestDescriptors)
+        {
+            try
+            {
+                $requests = array();
+
+                foreach ($requestDescriptors as $requestDescriptor)
+                {
+                    list($request, $params) = $requestDescriptor;
+
+                    if(!$request instanceof RequestDescriptor)
+                    {
+                        throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
+                    }
+
+                    $requests[] = $this->getClient()->createRequest($request->getMethod(), $request->getUrl(),
+                        $request->getHeaders(), $request->getBodyParams());
+                }
+
+                $this->getClient()->send($requests);
+            } catch (\Exception $exception)
+            {
+                throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
+            }
+        }
     }

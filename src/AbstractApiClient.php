@@ -122,6 +122,14 @@
             return $response;
         }
 
+        public function sendMany(array $delayedRequests)
+        {
+
+            $response = $this->getTransport()->sendMany($delayedRequests);
+
+            return $response;
+        }
+
         /**
          * @param RequestDescriptor $request
          * @param int               $flags
@@ -194,12 +202,9 @@
         {
             $this->isDelayed = false;
 
-            while($params = array_shift($this->delayedRequests))
-            {
-                list($request, $flags) = $params;
-                $this->send($request, $flags);
-            }
+            $this->sendMany($this->delayedRequests);
 
+            $this->delayedRequests = array();
             return $this;
         }
 

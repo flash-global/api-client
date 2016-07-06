@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1b5eb68a287b3725a1299183a939350e",
-    "content-hash": "a0891b211ce0a6cb4e3d729eaca89a20",
+    "hash": "71f347cbd2c29c90e28cc09f96eb3aab",
+    "content-hash": "73f40fca2e8140c5e0906dc8be29ebe5",
     "packages": [
         {
             "name": "amphp/amp",
@@ -387,16 +387,16 @@
         },
         {
             "name": "fei/entities",
-            "version": "dev-develop",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:flash-global/entities.git",
-                "reference": "865e9c6cd9b37e0c9ef0dee497121b9792145c78"
+                "reference": "12eec5928f115d75f13fcbfe756a58baa58e43f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flash-global/entities/zipball/865e9c6cd9b37e0c9ef0dee497121b9792145c78",
-                "reference": "865e9c6cd9b37e0c9ef0dee497121b9792145c78",
+                "url": "https://api.github.com/repos/flash-global/entities/zipball/12eec5928f115d75f13fcbfe756a58baa58e43f0",
+                "reference": "12eec5928f115d75f13fcbfe756a58baa58e43f0",
                 "shasum": ""
             },
             "require-dev": {
@@ -417,7 +417,7 @@
                 "source": "https://github.com/flash-global/entities/tree/develop",
                 "issues": "https://github.com/flash-global/entities/issues"
             },
-            "time": "2016-07-02 09:05:29"
+            "time": "2016-07-04 15:21:46"
         },
         {
             "name": "guzzle/guzzle",
@@ -3000,9 +3000,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "fei/entities": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

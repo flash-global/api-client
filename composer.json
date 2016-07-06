@@ -12,7 +12,7 @@
   "require": {
     "guzzle/guzzle": "^3.9",
     "amphp/artax": "^2.0",
-    "fei/entities": "dev-develop"
+    "fei/entities": "1.*"
   },
   "require-dev": {
     "codeception/codeception": "^2.2",

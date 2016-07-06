@@ -162,7 +162,7 @@ class ClientTest extends Unit
         $client->send($request2);
 
         $transport = $this->createMock(TransportInterface::class);
-        $transport->expects($this->exactly(2))->method('send')->withConsecutive([$request, 4 |ApiRequestOption::NO_RESPONSE], [$request2, ApiRequestOption::NO_RESPONSE]);
+        $transport->expects($this->once())->method('sendMany')->with([[$request, 4 |ApiRequestOption::NO_RESPONSE], [$request2, ApiRequestOption::NO_RESPONSE]]);
         $client->setTransport($transport);
 
         $fluent = $client->commit();

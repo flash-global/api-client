@@ -172,6 +172,22 @@ class ClientTest extends Unit
         $this->assertSame($fluent, $client);
     }
 
+
+    public function testAutoCommit()
+    {
+        $client = $this->getMockForAbstractClass(AbstractApiClient::class, array(), '', true, true, true, ['commit']);
+        $client->expects($this->once())->method('commit');
+
+
+        $client->enableAutoCommit();
+        $client->begin();
+        $client->setTransport($this->createMock(TransportInterface::class));
+        $client->send($this->createMock(RequestDescriptor::class));
+
+        // explicit call to desctuct
+        $client->__destruct();
+    }
+
 }
 
 class TestClient extends AbstractApiClient

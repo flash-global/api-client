@@ -191,14 +191,13 @@ abstract class AbstractApiClient implements ApiClientInterface
         }
     }
 
-    /**
-     *
-     */
     public function commit()
     {
         $this->isDelayed = false;
 
-        $this->sendMany($this->delayedRequests);
+        if(!empty($this->delayedRequests)){
+            $this->sendMany($this->delayedRequests);
+        }
 
         $this->delayedRequests = [];
 
@@ -207,11 +206,13 @@ abstract class AbstractApiClient implements ApiClientInterface
 
     public function enableAutoCommit(){
         $this->autoCommit = true;
+
         return $this;
     }
 
     public function disableAutoCommit(){
         $this->autoCommit = false;
+
         return $this;
     }
 

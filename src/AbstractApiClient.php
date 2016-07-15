@@ -91,7 +91,7 @@ abstract class AbstractApiClient implements ApiClientInterface
     public function rollback()
     {
         $this->isDelayed = false;
-        $this->delayedRequests = [];
+        $this->delayedRequests = array();
 
         return $this;
     }
@@ -108,7 +108,7 @@ abstract class AbstractApiClient implements ApiClientInterface
         $class = $response->getMeta('entity');
 
         $data = $response->getData();
-        $entity = [];
+        $entity = array();
 
         if (!empty($class)) {
 
@@ -141,7 +141,7 @@ abstract class AbstractApiClient implements ApiClientInterface
     public function send(RequestDescriptor $request, $flags = 0)
     {
         if ($this->delayNext || $this->isDelayed) {
-            $this->delayedRequests[] = [$request, $flags | ApiRequestOption::NO_RESPONSE];
+            $this->delayedRequests[] = array($request, $flags | ApiRequestOption::NO_RESPONSE);
 
             // reset stackNext flag
             $this->delayNext = false;
@@ -192,7 +192,7 @@ abstract class AbstractApiClient implements ApiClientInterface
             $this->sendMany($this->delayedRequests);
         }
 
-        $this->delayedRequests = [];
+        $this->delayedRequests = array();
 
         return $this;
     }
@@ -200,9 +200,10 @@ abstract class AbstractApiClient implements ApiClientInterface
     public function enableAutoCommit(){
         $this->begin();
 
-        register_shutdown_function(function () {
-            if ($this->getTransport() && !empty($this->delayedRequests) && $this->autoCommit) {
-                $this->commit();
+        $instance = $this;
+        register_shutdown_function(function () use ($instance) {
+            if ($instance->getTransport() && !empty($instance->delayedRequests) && $instance->autoCommit) {
+                $instance->commit();
             }
         });
 

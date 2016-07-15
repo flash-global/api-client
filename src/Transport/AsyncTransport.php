@@ -30,7 +30,7 @@ class AsyncTransport implements TransportInterface
     /**
      * @var array
      */
-    protected $promises = [];
+    protected $promises = array();
 
     /**
      * BasicTransport constructor.

@@ -9,16 +9,16 @@
     "packages": [
         {
             "name": "fei/entities",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "git@github.com:flash-global/entities.git",
-                "reference": "c2c64909056661bbb732d629b4e6913d97295f11"
+                "reference": "8a3f7e7548394525fb9dc4679367d76f67866eae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flash-global/entities/zipball/c2c64909056661bbb732d629b4e6913d97295f11",
-                "reference": "c2c64909056661bbb732d629b4e6913d97295f11",
+                "url": "https://api.github.com/repos/flash-global/entities/zipball/8a3f7e7548394525fb9dc4679367d76f67866eae",
+                "reference": "8a3f7e7548394525fb9dc4679367d76f67866eae",
                 "shasum": ""
             },
             "require-dev": {
@@ -36,10 +36,10 @@
             ],
             "description": "Entities descriptors and helpers",
             "support": {
-                "source": "https://github.com/flash-global/entities/tree/develop",
+                "source": "https://github.com/flash-global/entities/tree/master",
                 "issues": "https://github.com/flash-global/entities/issues"
             },
-            "time": "2016-07-12 14:16:00"
+            "time": "2016-07-13 16:20:06"
         },
         {
             "name": "guzzle/guzzle",

@@ -175,12 +175,51 @@ class ClientTest extends Unit
 
     public function testAutoCommit()
     {
+        /** @var AbstractApiClient $client */
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, array(), '', true, true, true, ['commit']);
-
+        
         $client->enableAutoCommit();
         $this->assertAttributeEquals(true, 'isDelayed', $client);
     }
 
+    public function testForceSendingARequest()
+    {
+        /** @var AbstractApiClient $client */
+        $client = $this->getMockForAbstractClass(AbstractApiClient::class, array(), '', true, true, true, ['commit']);
+    
+        $this->assertAttributeEquals(false, 'forceNext', $client);
+        $this->assertAttributeEquals(false, 'delayNext', $client);
+        
+        
+        $transport = $this->createMock(TransportInterface::class);
+        $transport->expects($this->once())->method('send');
+     
+        $client->setTransport($transport);
+        
+        // should not actually call send
+        $client->begin()->send(new RequestDescriptor());
+        
+        // should call send
+        $client->begin()->force();
+        $this->assertAttributeEquals(true, 'forceNext', $client);
+        
+        $client->send(new RequestDescriptor());
+        $this->assertAttributeEquals(false, 'forceNext', $client);
+        
+        // check there is no interference between delay and force
+        $client->delay();
+        $this->assertAttributeEquals(true, 'delayNext', $client);
+        
+        // activating "force" should reset "delay"
+        $client->force();
+        $this->assertAttributeEquals(false, 'delayNext', $client);
+        $this->assertAttributeEquals(true, 'forceNext', $client);
+        
+        // and vice-versa
+        $client->delay();
+        $this->assertAttributeEquals(true, 'delayNext', $client);
+        $this->assertAttributeEquals(false, 'forceNext', $client);
+    }
 }
 
 class TestClient extends AbstractApiClient

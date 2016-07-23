@@ -19,7 +19,7 @@ use Fei\Entity\Exception;
  * Class AsyncTransport
  * @package Fei\ApiClient\Transport
  */
-class AsyncTransport implements TransportInterface
+class AsyncTransport implements AsyncTransportInterface
 {
     /** @var array  */
     protected $clientOptions = array();

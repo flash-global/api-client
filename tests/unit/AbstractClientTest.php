@@ -4,10 +4,13 @@ namespace Tests\Fei\ApiClient;
 
 use Codeception\Test\Unit;
 use Fei\ApiClient\AbstractApiClient;
+use Fei\ApiClient\ApiClientException;
 use Fei\ApiClient\ApiRequestOption;
 use Fei\ApiClient\RequestDescriptor;
 use Fei\ApiClient\ResponseDescriptor;
+use Fei\ApiClient\Transport\AsyncTransportInterface;
 use Fei\ApiClient\Transport\TransportInterface;
+use Symfony\Component\Yaml\Tests\A;
 use UnitTester;
 
 class ClientTest extends Unit
@@ -30,6 +33,21 @@ class ClientTest extends Unit
 
         $this->assertSame($transport, $client->getTransport());
         $this->assertAttributeSame($transport, 'transport', $client);
+
+    }
+    
+    public function testAsyncTransportAccessors()
+    {
+        $client = new TestClient;
+
+        $this->assertNull($client->getAsyncTransport());
+
+        $transport = $this->createMock(AsyncTransportInterface::class);
+
+        $client->setAsyncTransport($transport);
+
+        $this->assertSame($transport, $client->getAsyncTransport());
+        $this->assertAttributeSame($transport, 'asyncTransport', $client);
 
     }
 
@@ -91,6 +109,48 @@ class ClientTest extends Unit
         $client->send($request);
 
     }
+    
+    public function testCallingSendWithoutHavingSetASyncTransportThrowsAnException()
+    {
+        // PREPARE & ASSERT
+        $client = new TestClient();
+        $request = $this->createMock(RequestDescriptor::class);
+        $this->expectException(ApiClientException::class);
+        
+        // RUN
+        $client->send($request);
+
+    }
+    
+    public function testSendMethodProxiesCallToAsyncTransportSendMethodWhenUsingNoResponseFlag()
+    {
+        // PREPARE & ASSERT
+        $client = new TestClient();
+        $request = $this->createMock(RequestDescriptor::class);
+        $asyncTransport = $this->createMock(AsyncTransportInterface::class);
+        $asyncTransport->expects($this->once())->method('send')->with($request);
+        $client->setAsyncTransport($asyncTransport);
+        
+        // RUN
+        $client->send($request, ApiRequestOption::NO_RESPONSE);
+
+    }
+    
+    public function testAsyncRequestsAreFallingBackToSyncTransportWhenNoAsyncTransportIsSet()
+    {
+        // PREPARE & ASSERT
+        $client    = new TestClient();
+        $request   = $this->createMock(RequestDescriptor::class);
+        $transport = $this->createMock(TransportInterface::class);
+        $transport->expects($this->once())->method('send')->with($request);
+        $client->setTransport($transport);
+    
+        // RUN
+        $client->send($request, ApiRequestOption::NO_RESPONSE);
+
+    }
+    
+    
 
     public function testUrlForging()
     {
@@ -220,8 +280,35 @@ class ClientTest extends Unit
         $this->assertAttributeEquals(true, 'delayNext', $client);
         $this->assertAttributeEquals(false, 'forceNext', $client);
     }
+    
+    public function testOptionsHandling()
+    {
+        /** @var AbstractApiClient $client */
+        $client = $this->getMockForAbstractClass(AbstractApiClient::class, array(array(AbstractApiClient::OPTION_BASEURL => 'http://base-url.com')), '', true, true, true, ['commit']);
+    
+        $this->assertAttributeEquals('http://base-url.com', 'baseUrl', $client);
+        $this->assertEquals('http://base-url.com', $client->getBaseUrl());
+    }
+    
+    public function testOptionsInitialization()
+    {
+        $client = $this->getMockForAbstractClass(AbstractApiClient::class, array(array(AbstractApiClient::OPTION_BASEURL => 'http://base-url.com')), '', true, true, true, ['commit']);
+        $this->assertAttributeEquals(array('baseUrl'), 'availableOptions', $client);
+        
+        $client = new TestClient();
+        $this->assertAttributeEquals(array('testOption', 'baseUrl'), 'availableOptions', $client);
+    }
+    
+    public function testSettingUnknownOptionThrowsAnException()
+    {
+        $client = $this->getMockForAbstractClass(AbstractApiClient::class, array(array(AbstractApiClient::OPTION_BASEURL => 'http://base-url.com')), '', true, true, true, ['commit']);
+        $this->expectException(ApiClientException::class);
+        
+        $client->setOption('unkownOption', 'any value');
+    }
 }
 
 class TestClient extends AbstractApiClient
 {
+    const OPTION_TEST = 'testOption';
 }

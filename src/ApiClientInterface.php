@@ -2,8 +2,9 @@
 
 namespace Fei\ApiClient;
 
+use Fei\ApiClient\Transport\SyncTransportInterface;
 use Fei\ApiClient\Transport\TransportInterface;
-
+use Fei\Entity\EntityInterface;
 
 /**
  * Interface ApiClientInterface
@@ -15,13 +16,13 @@ interface ApiClientInterface
      * @return TransportInterface
      */
     public function getTransport();
-
+    
     /**
-     * @param TransportInterface $transport
+     * @param SyncTransportInterface $transport
      *
      * @return $this
      */
-    public function setTransport(TransportInterface $transport);
+    public function setTransport(SyncTransportInterface $transport);
 
     /**
      * @param RequestDescriptor $request
@@ -35,7 +36,7 @@ interface ApiClientInterface
      * @param RequestDescriptor $request
      * @param int               $flags
      *
-     * @return Fei\Entity\EntityInterface
+     * @return EntityInterface
      */
     public function fetch(RequestDescriptor $request, $flags = 0);
 

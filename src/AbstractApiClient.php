@@ -2,6 +2,8 @@
     
     namespace Fei\ApiClient;
     
+    use Fei\ApiClient\Transport\AsyncTransportInterface;
+    use Fei\ApiClient\Transport\SyncTransportInterface;
     use Fei\ApiClient\Transport\TransportInterface;
     use Fei\Entity\EntityInterface;
     
@@ -12,6 +14,11 @@
      */
     abstract class AbstractApiClient implements ApiClientInterface
     {
+    
+        /**
+         * Remote service base URL (without path)
+         */
+        const OPTION_BASEURL = 'baseUrl';
         
         /**
          * @var string
@@ -22,6 +29,11 @@
          * @var  TransportInterface
          */
         protected $transport;
+    
+        /**
+         * @var AsyncTransportInterface
+         */
+        protected $asyncTransport;
         
         /**
          * @var bool
@@ -47,7 +59,78 @@
          * @var bool Ignore delay settings for next request
          */
         protected $forceNext = false;
-        
+    
+        /**
+         * @var array
+         */
+        protected $options = array();
+    
+        /**
+         * @var array
+         */
+        protected $availableOptions = array();
+    
+        /**
+         * AbstractApiClient constructor.
+         *
+         * @param array $options
+         */
+        public function __construct(array $options = array())
+        {
+            $this->initOptions();
+            $this->setOptions($options);
+        }
+    
+        /**
+         * Initialize availableOptions property based on existing OPTION_* constants
+         */
+        protected function initOptions()
+        {
+            $refelectedClient = new \ReflectionObject($this);
+            $constants = $refelectedClient->getConstants();
+    
+            foreach ($constants as $constant => $value)
+            {
+                if(strpos($constant, 'OPTION_') === 0)
+                {
+                    $this->availableOptions[] = $value;
+                }
+            }
+        }
+    
+        /**
+         * @param array $options
+         *
+         * @return $this
+         */
+        public function setOptions(array $options)
+        {
+            foreach ($options as $option => $value)
+            {
+                $this->setOption($option, $value);
+            }
+            
+            return $this;
+        }
+    
+        /**
+         * @param $option
+         * @param $value
+         *
+         * @return $this
+         */
+        public function setOption($option, $value)
+        {
+            if(in_array($option, $this->availableOptions))
+            {
+                $this->$option = $value;
+    
+                return $this;
+            }
+            
+            throw new ApiClientException(sprintf('Trying to set unknown option "%s" on %s ', $option, get_class()));
+            
+        }
         
         /**
          * @return $this
@@ -153,16 +236,37 @@
         }
         
         /**
-         * @param TransportInterface $transport
+         * @param SyncTransportInterface $transport
          *
          * @return $this
          */
-        public function setTransport(TransportInterface $transport)
+        public function setTransport(SyncTransportInterface $transport)
         {
             $this->transport = $transport;
             
             return $this;
         }
+    
+        /**
+         * @return AsyncTransportInterface
+         */
+        public function getAsyncTransport()
+        {
+            return $this->asyncTransport;
+        }
+    
+        /**
+         * @param AsyncTransportInterface $asyncTransport
+         *
+         * @return $this
+         */
+        public function setAsyncTransport(AsyncTransportInterface $asyncTransport)
+        {
+            $this->asyncTransport = $asyncTransport;
+        
+            return $this;
+        }
+        
         
         /**
          * @return $this
@@ -180,7 +284,7 @@
          *
          * @param int               $flags
          *
-         * @return ResponseDescriptor
+         * @return ResponseDescriptor|bool
          */
         public function send(RequestDescriptor $request, $flags = 0)
         {
@@ -193,7 +297,7 @@
                     // reset stackNext flag
                     $this->delayNext = false;
     
-                    return null;
+                    return true;
                 }
                 else {
                     // reset forceNext flag
@@ -201,9 +305,41 @@
                 }
             }
             
-            $response = $this->getTransport()->send($request, $flags);
+            $transport = $this->getAppropriateTransport($flags);
+    
+            if (is_null($transport)) {
+                throw new ApiClientException(sprintf('No transport has been set on "%s"', get_class()));
+            }
+            
+            $response = $transport->send($request, $flags);
             
             return $response;
+        }
+    
+    
+        /**
+         * Returns the most appropriate transport according to request flags
+         *
+         * @param $flags
+         *
+         * @return AsyncTransportInterface|TransportInterface
+         */
+        protected function getAppropriateTransport($flags)
+        {
+            if ($flags & ApiRequestOption::NO_RESPONSE)
+            {
+                $transport = $this->getAsyncTransport();
+                if (is_null($transport))
+                {
+                    $transport = $this->getTransport();
+                }
+            }
+            else
+            {
+                $transport = $this->getTransport();
+            }
+    
+            return $transport;
         }
         
         /**

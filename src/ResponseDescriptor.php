@@ -4,22 +4,27 @@
     namespace Fei\ApiClient;
     
     
-    class ResponseDescriptor
+    class ResponseDescriptor implements \JsonSerializable
     {
-
+        
         /** @var  int */
         protected $code;
-        /** @var array  */
+        
+        /** @var array */
         protected $headers = array();
+        
         /** @var  string */
         protected $body;
+        
         /** @var  string */
         protected $data;
+        
         /** @var  array */
         protected $meta;
+        
         /** @var  string */
         protected $metaEntity;
-
+        
         /**
          * @return int
          */
@@ -27,7 +32,7 @@
         {
             return $this->code;
         }
-
+        
         /**
          * @param int $code
          *
@@ -36,10 +41,10 @@
         public function setCode($code)
         {
             $this->code = (int) $code;
-
+            
             return $this;
         }
-
+        
         /**
          * @return array
          */
@@ -47,7 +52,7 @@
         {
             return $this->headers;
         }
-
+        
         /**
          * @param array $headers
          *
@@ -56,10 +61,10 @@
         public function setHeaders($headers)
         {
             $this->headers = $headers;
-
+            
             return $this;
         }
-
+        
         /**
          * @return string
          */
@@ -67,7 +72,7 @@
         {
             return $this->body;
         }
-
+        
         /**
          * @param string $body
          *
@@ -76,10 +81,10 @@
         public function setBody($body)
         {
             $this->body = $body;
-
+            
             return $this;
         }
-
+        
         /**
          * @return array
          */
@@ -87,14 +92,15 @@
         {
             $data = '';
             $body = json_decode($this->body, true);
-
-            if (!empty($body) && isset($body['data'])) {
+            
+            if (!empty($body) && isset($body['data']))
+            {
                 $data = $body['data'];
             }
-
+            
             return $data;
         }
-
+        
         /**
          * @param null|string $key
          *
@@ -104,10 +110,11 @@
         {
             $meta = '';
             $body = json_decode($this->body, true);
-
-            if(!empty($body) && isset($body['meta'])) {
-
-                if(!empty($key) && isset($body['meta'][$key]))
+            
+            if (!empty($body) && isset($body['meta']))
+            {
+                
+                if (!empty($key) && isset($body['meta'][$key]))
                 {
                     $meta = $body['meta'][$key];
                 }
@@ -116,8 +123,13 @@
                     $meta = $body['meta'];
                 }
             }
-
+            
             return $meta;
         }
-
+    
+        function jsonSerialize()
+        {
+            return get_object_vars($this);
+        }
+    
     }

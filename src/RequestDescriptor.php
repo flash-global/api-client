@@ -3,7 +3,7 @@
     namespace Fei\ApiClient;
     
     
-    class RequestDescriptor
+    class RequestDescriptor implements \JsonSerializable
     {
         protected $url;
         
@@ -165,5 +165,11 @@
         {
             return $this->headers[$key];
         }
-
+    
+        function jsonSerialize()
+        {
+            return get_object_vars($this);
+        }
+    
+    
     }

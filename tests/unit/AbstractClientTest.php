@@ -10,6 +10,7 @@
     use Fei\ApiClient\ResponseDescriptor;
     use Fei\ApiClient\Transport\AsyncTransportInterface;
     use Fei\ApiClient\Transport\SyncTransportInterface;
+    use Fei\ApiClient\Transport\TransportException;
     use UnitTester;
     
     class ClientTest extends Unit
@@ -306,6 +307,46 @@
             
             $client->setOption('unkownOption', 'any value');
         }
+        
+        public function testFallbackTransport()
+        {
+            $client = new TestClient();
+            
+            $asyncTransport = $this->createMock(AsyncTransportInterface::class);
+            $asyncTransport->method('send')->willThrowException(new TransportException());
+            
+            $syncTransport = $this->createMock(SyncTransportInterface::class);
+            $syncTransport->expects($this->once())->method('send');
+            
+            $client->setAsyncTransport($asyncTransport);
+            $client->setTransport($syncTransport);
+            
+            $request = $this->createMock(RequestDescriptor::class);
+            
+            $client->send($request, ApiRequestOption::NO_RESPONSE);
+            
+        }
+    
+        public function testFallbackTransportIsNotUsedWhenPrimaryTransportIsOk()
+        {
+            $client = new TestClient();
+        
+            $asyncTransport = $this->createMock(AsyncTransportInterface::class);
+            $asyncTransport->method('send')->willReturn(true);
+        
+            $syncTransport = $this->createMock(SyncTransportInterface::class);
+            $syncTransport->expects($this->never())->method('send');
+        
+            $client->setAsyncTransport($asyncTransport);
+            $client->setTransport($syncTransport);
+        
+            $request = $this->createMock(RequestDescriptor::class);
+        
+            $client->send($request, ApiRequestOption::NO_RESPONSE);
+        
+        }
+    
+    
     }
     
     class TestClient extends AbstractApiClient

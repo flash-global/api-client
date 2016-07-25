@@ -353,7 +353,11 @@
                     $transport = $this->getTransport();
                 }
                 else {
-                    $this->setFallbackTransport($this->getTransport());
+                    $fallback = $this->getTransport();
+                    if($fallback)
+                    {
+                        $this->setFallbackTransport($fallback);
+                    }
                 }
             }
             else

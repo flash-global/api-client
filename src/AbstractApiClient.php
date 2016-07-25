@@ -4,6 +4,7 @@
     
     use Fei\ApiClient\Transport\AsyncTransportInterface;
     use Fei\ApiClient\Transport\SyncTransportInterface;
+    use Fei\ApiClient\Transport\TransportException;
     use Fei\ApiClient\Transport\TransportInterface;
     use Fei\Entity\EntityInterface;
     
@@ -26,7 +27,7 @@
         protected $baseUrl;
         
         /**
-         * @var  TransportInterface
+         * @var  SyncTransportInterface
          */
         protected $transport;
     
@@ -34,6 +35,11 @@
          * @var AsyncTransportInterface
          */
         protected $asyncTransport;
+    
+        /**
+         * @var TransportInterface;
+         */
+        protected $fallbackTransport;
         
         /**
          * @var bool
@@ -69,7 +75,7 @@
          * @var array
          */
         protected $availableOptions = array();
-    
+        
         /**
          * AbstractApiClient constructor.
          *
@@ -86,8 +92,8 @@
          */
         protected function initOptions()
         {
-            $refelectedClient = new \ReflectionObject($this);
-            $constants = $refelectedClient->getConstants();
+            $reflectedClient = new \ReflectionObject($this);
+            $constants       = $reflectedClient->getConstants();
     
             foreach ($constants as $constant => $value)
             {
@@ -311,7 +317,20 @@
                 throw new ApiClientException(sprintf('No transport has been set on "%s"', get_class()));
             }
             
-            $response = $transport->send($request, $flags);
+            try
+            {
+                $response = $transport->send($request, $flags);
+            }
+            catch(TransportException $e)
+            {
+                // fallback?
+                if($fallback = $this->getFallbackTransport())
+                {
+                    $response = $fallback->send($request, $flags);
+                }
+            }
+            
+            $this->resetFallbackTransport();
             
             return $response;
         }
@@ -332,6 +351,9 @@
                 if (is_null($transport))
                 {
                     $transport = $this->getTransport();
+                }
+                else {
+                    $this->setFallbackTransport($this->getTransport());
                 }
             }
             else
@@ -413,4 +435,35 @@
             
             return $this;
         }
+    
+        /**
+         * @return TransportInterface
+         */
+        public function getFallbackTransport()
+        {
+            return $this->fallbackTransport;
+        }
+    
+        /**
+         * @param TransportInterface $fallbackTransport
+         *
+         * @return $this
+         */
+        public function setFallbackTransport(TransportInterface $fallbackTransport)
+        {
+            $this->fallbackTransport = $fallbackTransport;
+        
+            return $this;
+        }
+    
+        /**
+         *
+         */
+        public function resetFallbackTransport()
+        {
+            $this->fallbackTransport = null;
+            
+            return $this;
+        }
+        
     }

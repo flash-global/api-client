@@ -14,7 +14,54 @@
         protected $bodyParams = array();
 
         protected $headers = array();
-
+    
+        public function __construct($data = null)
+        {
+            if(!is_null($data))
+            {
+                $this->hydrate($data);
+            }
+        }
+    
+        /**
+         * @param $data
+         *
+         * @return $this
+         * @throws ApiClientException
+         */
+        public function hydrate($data)
+        {
+            if($data instanceof \ArrayObject)
+            {
+                $data = $data->getArrayCopy();
+            }
+            
+            if($data instanceof \Iterator)
+            {
+                $data = iterator_to_array($data);
+            }
+            
+            if(!is_array($data)) {
+                throw new ApiClientException('RequestDescriptor need an array, ArrayObject or Iterator instance to get hydrated');
+            }
+            
+            foreach($data as $property => $value)
+            {
+                $setter = 'set' . ucfirst($property);
+                
+                $this->$setter($value);
+            }
+            
+            return $this;
+        }
+        
+        
+        public function toArray()
+        {
+            return get_object_vars($this);
+        }
+    
+        
         /**
          * @return array
          */
@@ -168,8 +215,7 @@
     
         function jsonSerialize()
         {
-            return get_object_vars($this);
+            return $this->toArray();
         }
-    
     
     }

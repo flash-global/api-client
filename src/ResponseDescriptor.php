@@ -127,6 +127,14 @@
             return $meta;
         }
     
+        /**
+         * @return bool
+         */
+        public function isSuccess()
+        {
+            return $this->code && ($this->code >= 200 && $this->code < 300);
+        }
+    
         function jsonSerialize()
         {
             return get_object_vars($this);

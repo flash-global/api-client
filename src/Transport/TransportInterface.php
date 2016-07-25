@@ -29,10 +29,10 @@
         public function send(RequestDescriptor $requestDescriptor, $flags = 0);
 
         /**
-         * @param array $delayedRequests
+         * @param array $requests
          *
          * @return mixed
          */
-        public function sendMany(array $delayedRequests);
+        public function sendMany(array $requests);
 
     }

@@ -1,28 +1,27 @@
 <?php
-
+    
     namespace Fei\ApiClient\Transport;
-
-
+    
+    
+    use Fei\ApiClient\ApiClientException;
     use Fei\ApiClient\RequestDescriptor;
-    use Fei\ApiClient\Response;
     use Fei\ApiClient\ResponseDescriptor;
     use Guzzle\Service\Client;
-    use Fei\ApiClient\ApiClientException;
-
+    
     /**
      * Class BasicTransport
      *
      * @package Fei\ApiClient\Transport
      */
-    class BasicTransport implements TransportInterface
+    class BasicTransport implements SyncTransportInterface
     {
         /**
          * @var Client
          */
         protected $client;
-
+        
         protected $clientOptions = array();
-
+        
         /**
          * BasicTransport constructor.
          *
@@ -32,33 +31,7 @@
         {
             $this->clientOptions = $options;
         }
-
-        /**
-         * @return Client
-         */
-        public function getClient()
-        {
-            if(is_null($this->client))
-            {
-                $this->client = new Client($this->clientOptions);
-            }
-            
-            return $this->client;
-        }
-
-        /**
-         * @param Client $client
-         *
-         * @return $this
-         */
-        public function setClient($client)
-        {
-            $this->client = $client;
-
-            return $this;
-        }
-
-
+        
         /**
          * @param RequestDescriptor $requestDescriptor
          *
@@ -72,14 +45,16 @@
         {
             try
             {
-                $request = $this->getClient()->createRequest($requestDescriptor->getMethod(), $requestDescriptor->getUrl(), $requestDescriptor->getHeaders(), $requestDescriptor->getBodyParams());
+                $request  = $this->getClient()
+                                 ->createRequest($requestDescriptor->getMethod(), $requestDescriptor->getUrl(), $requestDescriptor->getHeaders(), $requestDescriptor->getBodyParams())
+                ;
                 $response = $this->getClient()->send($request);
-
+                
             } catch (\Exception $exception)
             {
                 throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
             }
-
+            
             $responseDescriptor = new ResponseDescriptor();
             $responseDescriptor->setBody($response->getBody());
             $responseDescriptor->setCode($response->getStatusCode());
@@ -87,30 +62,56 @@
             
             return $responseDescriptor;
         }
-
+        
         public function sendMany(array $requestDescriptors)
         {
             try
             {
                 $requests = array();
-
+                
                 foreach ($requestDescriptors as $requestDescriptor)
                 {
                     list($request, $params) = $requestDescriptor;
-
-                    if(!$request instanceof RequestDescriptor)
+                    
+                    if (!$request instanceof RequestDescriptor)
                     {
                         throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
                     }
-
+                    
                     $requests[] = $this->getClient()->createRequest($request->getMethod(), $request->getUrl(),
-                        $request->getHeaders(), $request->getBodyParams());
+                        $request->getHeaders(), $request->getBodyParams())
+                    ;
                 }
-
+                
                 $this->getClient()->send($requests);
             } catch (\Exception $exception)
             {
                 throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
             }
+        }
+        
+        /**
+         * @return Client
+         */
+        public function getClient()
+        {
+            if (is_null($this->client))
+            {
+                $this->client = new Client($this->clientOptions);
+            }
+            
+            return $this->client;
+        }
+        
+        /**
+         * @param Client $client
+         *
+         * @return $this
+         */
+        public function setClient($client)
+        {
+            $this->client = $client;
+            
+            return $this;
         }
     }

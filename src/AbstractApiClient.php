@@ -1,13 +1,13 @@
 <?php
-    
+
     namespace Fei\ApiClient;
-    
+
     use Fei\ApiClient\Transport\AsyncTransportInterface;
     use Fei\ApiClient\Transport\SyncTransportInterface;
     use Fei\ApiClient\Transport\TransportException;
     use Fei\ApiClient\Transport\TransportInterface;
     use Fei\Entity\EntityInterface;
-    
+
     /**
      * Class AbstractApiApiClient
      *
@@ -15,67 +15,67 @@
      */
     abstract class AbstractApiClient implements ApiClientInterface
     {
-    
+
         /**
          * Remote service base URL (without path)
          */
         const OPTION_BASEURL = 'baseUrl';
-        
+
         /**
          * @var string
          */
         protected $baseUrl;
-        
+
         /**
          * @var  SyncTransportInterface
          */
         protected $transport;
-    
+
         /**
          * @var AsyncTransportInterface
          */
         protected $asyncTransport;
-    
+
         /**
          * @var TransportInterface;
          */
         protected $fallbackTransport;
-        
+
         /**
          * @var bool
          */
         protected $delayNext = false;
-        
+
         /**
          * @var array
          */
         protected $delayedRequests;
-        
+
         /**
          * @var bool
          */
         protected $isDelayed = false;
-        
+
         /**
          * @var bool
          */
         protected $autoCommit = true;
-    
+
         /**
          * @var bool Ignore delay settings for next request
          */
         protected $forceNext = false;
-    
+
         /**
          * @var array
          */
         protected $options = array();
-    
+
         /**
          * @var array
          */
         protected $availableOptions = array();
-        
+
         /**
          * AbstractApiClient constructor.
          *
@@ -86,7 +86,7 @@
             $this->initOptions();
             $this->setOptions($options);
         }
-    
+
         /**
          * Initialize availableOptions property based on existing OPTION_* constants
          */
@@ -94,7 +94,7 @@
         {
             $reflectedClient = new \ReflectionObject($this);
             $constants       = $reflectedClient->getConstants();
-    
+
             foreach ($constants as $constant => $value)
             {
                 if(strpos($constant, 'OPTION_') === 0)
@@ -103,7 +103,7 @@
                 }
             }
         }
-    
+
         /**
          * @param array $options
          *
@@ -115,13 +115,13 @@
             {
                 $this->setOption($option, $value);
             }
-            
+
             return $this;
         }
-    
+
         /**
-         * @param $option
-         * @param $value
+         * @param string $option
+         * @param mixed  $value
          *
          * @return $this
          */
@@ -129,22 +129,27 @@
         {
             if(in_array($option, $this->availableOptions))
             {
-                $this->$option = $value;
-    
+                $method = sprintf('set%s', ucfirst($option));
+                if (method_exists($this, $method)) {
+                    $this->$method($value);
+                } else {
+                    $this->$option = $value;
+                }
+
                 return $this;
             }
-            
+
             throw new ApiClientException(sprintf('Trying to set unknown option "%s" on %s ', $option, get_class()));
-            
+
         }
-        
+
         /**
          * @return $this
          */
         public function enableAutoCommit()
         {
             $this->begin();
-            
+
             $instance = $this;
             register_shutdown_function(function () use ($instance)
             {
@@ -153,22 +158,22 @@
                     $instance->commit();
                 }
             });
-            
+
             $this->autoCommit = true;
-            
+
             return $this;
         }
-        
+
         /**
          * @return $this
          */
         public function begin()
         {
             $this->isDelayed = true;
-            
+
             return $this;
         }
-        
+
         /**
          * Forge complete URL
          *
@@ -180,20 +185,20 @@
         {
             return $this->getBaseUrl() . ltrim($path, '/');
         }
-        
+
         /**
          * Tells client to stack the next request
          */
         public function delay()
         {
             $this->delayNext = true;
-            
+
             // also reset forceNext flag since both modes are not compatible
             $this->forceNext = false;
-            
+
             return $this;
         }
-        
+
         /**
          * @param RequestDescriptor $request
          * @param int               $flags
@@ -204,13 +209,13 @@
         {
             $response = $this->send($request, $flags);
             $class    = $response->getMeta('entity');
-            
+
             $data   = $response->getData();
             $entity = array();
-            
+
             if (!empty($class))
             {
-                
+
                 if (is_array($data[0]))
                 {
                     foreach ($data as $resource)
@@ -223,16 +228,16 @@
                 }
                 else
                 {
-                    
+
                     /** @var EntityInterface $entity */
                     $entity = new $class;
                     $entity->hydrate($response->getData());
                 }
             }
-            
+
             return $entity;
         }
-        
+
         /**
          * @return TransportInterface
          */
@@ -240,7 +245,7 @@
         {
             return $this->transport;
         }
-        
+
         /**
          * @param SyncTransportInterface $transport
          *
@@ -249,10 +254,10 @@
         public function setTransport(SyncTransportInterface $transport)
         {
             $this->transport = $transport;
-            
+
             return $this;
         }
-    
+
         /**
          * @return AsyncTransportInterface
          */
@@ -260,7 +265,7 @@
         {
             return $this->asyncTransport;
         }
-    
+
         /**
          * @param AsyncTransportInterface $asyncTransport
          *
@@ -269,11 +274,11 @@
         public function setAsyncTransport(AsyncTransportInterface $asyncTransport)
         {
             $this->asyncTransport = $asyncTransport;
-        
+
             return $this;
         }
-        
-        
+
+
         /**
          * @return $this
          */
@@ -281,10 +286,10 @@
         {
             $this->isDelayed       = false;
             $this->delayedRequests = array();
-            
+
             return $this;
         }
-        
+
         /**
          * @param RequestDescriptor $request
          *
@@ -299,10 +304,10 @@
                 if(!$this->forceNext)
                 {
                     $this->delayedRequests[] = array($request, $flags | ApiRequestOption::NO_RESPONSE);
-    
+
                     // reset stackNext flag
                     $this->delayNext = false;
-    
+
                     return true;
                 }
                 else {
@@ -310,13 +315,13 @@
                     $this->forceNext = false;
                 }
             }
-            
+
             $transport = $this->getAppropriateTransport($flags);
-    
+
             if (is_null($transport)) {
                 throw new ApiClientException(sprintf('No transport has been set on "%s"', get_class()));
             }
-            
+
             try
             {
                 $response = $transport->send($request, $flags);
@@ -329,13 +334,13 @@
                     $response = $fallback->send($request, $flags);
                 }
             }
-            
+
             $this->resetFallbackTransport();
-            
+
             return $response;
         }
-    
-    
+
+
         /**
          * Returns the most appropriate transport according to request flags
          *
@@ -364,10 +369,10 @@
             {
                 $transport = $this->getTransport();
             }
-    
+
             return $transport;
         }
-        
+
         /**
          * @return string
          */
@@ -375,7 +380,7 @@
         {
             return $this->baseUrl;
         }
-        
+
         /**
          * @param string $baseUrl
          *
@@ -384,27 +389,27 @@
         public function setBaseUrl($baseUrl)
         {
             $this->baseUrl = rtrim($baseUrl, '/') . '/';
-            
+
             return $this;
         }
-        
+
         /**
          * @return $this
          */
         public function commit()
         {
             $this->isDelayed = false;
-            
+
             if (!empty($this->delayedRequests))
             {
                 $this->sendMany($this->delayedRequests);
             }
-            
+
             $this->delayedRequests = array();
-            
+
             return $this;
         }
-        
+
         /**
          * @param array $requests
          *
@@ -413,33 +418,33 @@
         public function sendMany(array $requests)
         {
             $response = $this->getTransport()->sendMany($requests);
-            
+
             return $response;
         }
-        
+
         /**
          * @return $this
          */
         public function disableAutoCommit()
         {
             $this->autoCommit = false;
-            
+
             return $this;
         }
-    
+
         /**
          * @return $this
          */
         public function force()
         {
             $this->forceNext = true;
-            
+
             // also reset the delayNext flag since both are not compatible
             $this->delayNext = false;
-            
+
             return $this;
         }
-    
+
         /**
          * @return TransportInterface
          */
@@ -447,7 +452,7 @@
         {
             return $this->fallbackTransport;
         }
-    
+
         /**
          * @param TransportInterface $fallbackTransport
          *
@@ -456,18 +461,18 @@
         public function setFallbackTransport(TransportInterface $fallbackTransport)
         {
             $this->fallbackTransport = $fallbackTransport;
-        
+
             return $this;
         }
-    
+
         /**
          *
          */
         public function resetFallbackTransport()
         {
             $this->fallbackTransport = null;
-            
+
             return $this;
         }
-        
+
     }

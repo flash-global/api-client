@@ -1,20 +1,20 @@
 <?php
-    
+
     namespace Fei\ApiClient;
-    
-    
-    class RequestDescriptor implements \JsonSerializable
+
+
+    class RequestDescriptor
     {
         protected $url;
-        
+
         protected $method;
-        
+
         protected $params = array();
-        
+
         protected $bodyParams = array();
 
         protected $headers = array();
-    
+
         public function __construct($data = null)
         {
             if(!is_null($data))
@@ -22,7 +22,7 @@
                 $this->hydrate($data);
             }
         }
-    
+
         /**
          * @param $data
          *
@@ -35,33 +35,26 @@
             {
                 $data = $data->getArrayCopy();
             }
-            
+
             if($data instanceof \Iterator)
             {
                 $data = iterator_to_array($data);
             }
-            
+
             if(!is_array($data)) {
                 throw new ApiClientException('RequestDescriptor need an array, ArrayObject or Iterator instance to get hydrated');
             }
-            
+
             foreach($data as $property => $value)
             {
                 $setter = 'set' . ucfirst($property);
-                
+
                 $this->$setter($value);
             }
-            
+
             return $this;
         }
-        
-        
-        public function toArray()
-        {
-            return get_object_vars($this);
-        }
-    
-        
+
         /**
          * @return array
          */
@@ -85,7 +78,7 @@
         {
             return $this->url;
         }
-        
+
         /**
          * @param mixed $url
          *
@@ -94,10 +87,10 @@
         public function setUrl($url)
         {
             $this->url = $url;
-            
+
             return $this;
         }
-        
+
         /**
          * @return mixed
          */
@@ -105,7 +98,7 @@
         {
             return $this->method;
         }
-        
+
         /**
          * @param mixed $method
          *
@@ -114,11 +107,11 @@
         public function setMethod($method)
         {
             $this->method = $method;
-            
+
             return $this;
         }
-        
-        
+
+
         /**
          * @return array
          */
@@ -126,7 +119,7 @@
         {
             return $this->params;
         }
-        
+
         /**
          * @param array $params
          *
@@ -135,10 +128,10 @@
         public function setParams($params)
         {
             $this->params = $params;
-            
+
             return $this;
         }
-        
+
         /**
          * @return array
          */
@@ -146,7 +139,7 @@
         {
             return $this->headers;
         }
-        
+
         /**
          * @param array $headers
          *
@@ -155,7 +148,7 @@
         public function setHeaders($headers)
         {
             $this->headers = $headers;
-            
+
             return $this;
         }
 
@@ -212,10 +205,12 @@
         {
             return $this->headers[$key];
         }
-    
-        function jsonSerialize()
+
+        /**
+         * @return array
+         */
+        public function toArray()
         {
-            return $this->toArray();
+            return get_object_vars($this);
         }
-    
     }

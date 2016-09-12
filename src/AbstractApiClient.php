@@ -139,7 +139,33 @@
                 return $this;
             }
 
-            throw new ApiClientException(sprintf('Trying to set unknown option "%s" on %s ', $option, get_class()));
+            throw new ApiClientException(sprintf('Trying to set unknown option "%s" on %s ', $option, get_class($this)));
+
+        }
+
+
+
+        /**
+         * @param string $option
+         * @param mixed  $default
+         *
+         * @return $this
+         */
+        public function getOption($option, $default = null)
+        {
+            if(in_array($option, $this->availableOptions))
+            {
+                $method = 'get' . ucfirst($option);
+                if (method_exists($this, $method)) {
+                    return $this->$method();
+                } elseif(!empty($this->$option)) {
+                    return $this->$option;
+                }
+
+                return $default;
+            }
+
+            else throw new ApiClientException(sprintf('Trying to get unknown option "%s" on %s ', $option, get_class($this)));
 
         }
 

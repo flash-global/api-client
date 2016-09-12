@@ -6,6 +6,7 @@
     
     $I = new AcceptanceTester($scenario);
     $I->wantTo('check queuing mails is working');
+    $scenario->skip();
     
     $pheanstalk = new Pheanstalk('localhost');
     if(!$pheanstalk->getConnection()->isServiceListening())

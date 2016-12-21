@@ -22,5 +22,6 @@
     "psr-4": {
       "Fei\\ApiClient\\": "src/"
     }
-  }
+  },
+  "bin": ["scripts/api-client-worker.php"]
 }

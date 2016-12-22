@@ -330,6 +330,25 @@ class ClientTest extends Unit
 
     }
 
+    public function testNoFallbackTransport()
+    {
+        $client = new TestClient();
+
+        $asyncTransport = $this->createMock(AsyncTransportInterface::class);
+        $asyncTransport->method('send')->willThrowException(new TransportException());
+
+        $syncTransport = $this->createMock(SyncTransportInterface::class);
+        $syncTransport->expects($this->never())->method('send');
+
+        $client->setAsyncTransport($asyncTransport);
+
+        $request = $this->createMock(RequestDescriptor::class);
+
+        $this->expectException(TransportException::class);
+
+        $client->send($request, ApiRequestOption::NO_RESPONSE);
+    }
+
     public function testFallbackTransportIsNotUsedWhenPrimaryTransportIsOk()
     {
         $client = new TestClient();

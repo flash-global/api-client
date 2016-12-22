@@ -359,6 +359,9 @@
                 {
                     $response = $fallback->send($request, $flags);
                 }
+                else {
+                    throw $e;
+                }
             }
 
             $this->resetFallbackTransport();

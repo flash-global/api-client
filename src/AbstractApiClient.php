@@ -242,7 +242,7 @@
             if (!empty($class))
             {
 
-                if (is_array($data[0]))
+                if (isset($data[0]) && is_array($data[0]))
                 {
                     foreach ($data as $resource)
                     {

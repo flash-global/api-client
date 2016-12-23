@@ -11,6 +11,7 @@ use Fei\ApiClient\ResponseDescriptor;
 use Fei\ApiClient\Transport\AsyncTransportInterface;
 use Fei\ApiClient\Transport\SyncTransportInterface;
 use Fei\ApiClient\Transport\TransportException;
+use Fei\Entity\AbstractEntity;
 use UnitTester;
 
 class ClientTest extends Unit
@@ -189,6 +190,32 @@ class ClientTest extends Unit
         $client->setTransport($transport);
 
         $entity = $client->fetch($request);
+    }
+
+    public function testFetchReturnAnEntity()
+    {
+        $client = new TestClient();
+
+        $request = $this->createMock(RequestDescriptor::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport->expects($this->once())->method('send')->willReturnCallback(
+            function () {
+                return (new ResponseDescriptor())->setBody(json_encode([
+                    "data" => [
+                        "id" => 19
+                    ],
+                    "meta" => [
+                        "entity" => "Tests\\Fei\\ApiClient\\TestEntity"
+                    ]
+                ]));
+            }
+        );
+
+        $client->setTransport($transport);
+
+        $object = $client->fetch($request);
+
+        $this->assertEquals(new TestEntity(['id' => 19]), $object);
     }
 
     /**
@@ -374,4 +401,33 @@ class ClientTest extends Unit
 class TestClient extends AbstractApiClient
 {
     const OPTION_TEST = 'testOption';
+}
+
+class TestEntity extends AbstractEntity
+{
+    protected $id;
+
+    /**
+     * Get Id
+     *
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set Id
+     *
+     * @param mixed $id
+     *
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
 }

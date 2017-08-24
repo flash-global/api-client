@@ -22,4 +22,9 @@
          * Tells the transport that a repsonse is not expected nor awaited
          */
         const NO_RESPONSE = 1;
+
+        /**
+         * Tells whether or not the call is in safe mode (add a token in the header
+         */
+        const SAFE_MODE = 2;
     }

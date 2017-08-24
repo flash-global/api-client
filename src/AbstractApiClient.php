@@ -3,10 +3,12 @@
     namespace Fei\ApiClient;
 
     use Fei\ApiClient\Transport\AsyncTransportInterface;
+    use Fei\ApiClient\Transport\BasicTransport;
     use Fei\ApiClient\Transport\SyncTransportInterface;
     use Fei\ApiClient\Transport\TransportException;
     use Fei\ApiClient\Transport\TransportInterface;
     use Fei\Entity\EntityInterface;
+    use Fei\Service\Connect\Client\Token;
 
     /**
      * Class AbstractApiApiClient
@@ -20,6 +22,12 @@
          * Remote service base URL (without path)
          */
         const OPTION_BASEURL = 'baseUrl';
+
+        const OPTION_APPLICATION_ID = 'applicationId';
+
+        const OPTION_PRIVATE_KEY = 'privateKey';
+
+        const OPTION_CONNECT_URL = 'connectUrl';
 
         /**
          * @var string
@@ -77,14 +85,23 @@
         protected $availableOptions = array();
 
         /**
+         * Connect Token Client
+         *
+         * @var Token
+         */
+        protected $tokenClient;
+
+        /**
          * AbstractApiClient constructor.
          *
          * @param array $options
+         * @param Token|null $tokenClient
          */
-        public function __construct(array $options = array())
+        public function __construct(array $options = array(), Token $tokenClient = null)
         {
             $this->initOptions();
             $this->setOptions($options);
+            $this->setTokenClient($tokenClient);
         }
 
         /**
@@ -348,6 +365,29 @@
                 throw new ApiClientException(sprintf('No transport has been set on "%s"', get_class()));
             }
 
+            // want to add the token in the request headers
+            if ($flags & ApiRequestOption::SAFE_MODE) {
+                $tokenClient = $this->getTokenClient();
+
+                if (!$tokenClient instanceof Token) {
+                    throw new ApiClientException('You need to set the Token Client when using the safe mode flag!');
+                }
+
+                $applicationId = $tokenClient->getApplicationId();
+                if ($applicationId === null) {
+                    throw new ApiClientException('The identifier of the application is not set. You have to set it before using the safe mode.');
+                }
+
+                $privateKey = $tokenClient->getPrivateKey();
+                if ($privateKey === null) {
+                    throw new ApiClientException('The private key of the application is not set. You have to set it before using the safe mode.');
+                }
+
+                $token = $tokenClient->createApplicationToken($applicationId, $privateKey);
+                $request->addHeader('connect-token', $token);
+                $request->addHeader('connect-application', $applicationId);
+            }
+
             try
             {
                 $response = $transport->send($request, $flags);
@@ -500,6 +540,37 @@
         public function resetFallbackTransport()
         {
             $this->fallbackTransport = null;
+
+            return $this;
+        }
+
+        /**
+         * Get TokenClient
+         *
+         * @return Token
+         */
+        public function getTokenClient()
+        {
+            return $this->tokenClient;
+        }
+
+        /**
+         * Set TokenClient
+         *
+         * @param Token $tokenClient
+         *
+         * @return $this
+         */
+        public function setTokenClient($tokenClient)
+        {
+            if (null === $tokenClient && get_called_class() !== Token::class) {
+                $tokenClient = new Token([self::OPTION_BASEURL => $this->getOption(self::OPTION_CONNECT_URL)]);
+                $tokenClient->setApplicationId($this->getOption(self::OPTION_APPLICATION_ID));
+                $tokenClient->setPrivateKey($this->getOption(self::OPTION_PRIVATE_KEY));
+                $tokenClient->setTransport(new BasicTransport());
+            }
+
+            $this->tokenClient = $tokenClient;
 
             return $this;
         }

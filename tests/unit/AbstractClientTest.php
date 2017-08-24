@@ -9,9 +9,11 @@ use Fei\ApiClient\ApiRequestOption;
 use Fei\ApiClient\RequestDescriptor;
 use Fei\ApiClient\ResponseDescriptor;
 use Fei\ApiClient\Transport\AsyncTransportInterface;
+use Fei\ApiClient\Transport\BasicTransport;
 use Fei\ApiClient\Transport\SyncTransportInterface;
 use Fei\ApiClient\Transport\TransportException;
 use Fei\Entity\AbstractEntity;
+use Fei\Service\Connect\Client\Token;
 use UnitTester;
 
 class ClientTest extends Unit
@@ -321,10 +323,10 @@ class ClientTest extends Unit
     public function testOptionsInitialization()
     {
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']], '', true, true, true, ['commit']);
-        $this->assertAttributeEquals(['baseUrl'], 'availableOptions', $client);
+        $this->assertAttributeEquals(['baseUrl', 'applicationId', 'privateKey', 'connectUrl'], 'availableOptions', $client);
 
         $client = new TestClient();
-        $this->assertAttributeEquals(['testOption', 'baseUrl'], 'availableOptions', $client);
+        $this->assertAttributeEquals(['testOption', 'baseUrl', 'applicationId', 'privateKey', 'connectUrl'], 'availableOptions', $client);
     }
 
     public function testSettingUnknownOptionThrowsAnException()
@@ -395,7 +397,37 @@ class ClientTest extends Unit
 
     }
 
+    public function testGetTokenClient()
+    {
+        $client = new TestClient();
+        $client->setTokenClient(new Token());
 
+        $this->assertEquals(new Token(), $client->getTokenClient());
+    }
+
+    public function testSetTokenClientWhenParameterIsNull()
+    {
+        $client = $this->getMockBuilder(TestClient::class)->setMethods(['getOption'])->getMock();
+        $client->expects($this->exactly(3))->method('getOption')->withConsecutive(
+            [AbstractApiClient::OPTION_CONNECT_URL],
+            [AbstractApiClient::OPTION_APPLICATION_ID],
+            [AbstractApiClient::OPTION_PRIVATE_KEY]
+        )->willReturnOnConsecutiveCalls(
+            'connect',
+            'app',
+            'pk'
+        );
+        $client->setTokenClient(null);
+
+        $expected = new Token();
+
+        $expected = new Token([AbstractApiClient::OPTION_BASEURL => 'connect']);
+        $expected->setApplicationId('app');
+        $expected->setPrivateKey('pk');
+        $expected->setTransport(new BasicTransport());
+
+        $this->assertEquals($expected, $client->getTokenClient());
+    }
 }
 
 class TestClient extends AbstractApiClient

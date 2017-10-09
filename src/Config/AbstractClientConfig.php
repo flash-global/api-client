@@ -16,11 +16,6 @@ abstract class AbstractClientConfig extends SingleDirective
     protected $serviceIdentifier;
 
     /**
-     * @var string[] aliases of the service for the service container
-     */
-    protected $serviceAliases;
-
-    /**
      * @var AbstractTransportConfig[] array of transport configs
      */
     protected $transportConfig = [];
@@ -61,26 +56,14 @@ abstract class AbstractClientConfig extends SingleDirective
      * Set ServiceIdentifier
      *
      * @param string $serviceIdentifier the identifier of the service
-     * @param string[] $aliases the aliases used to fetch this service
      *
      * @return AbstractClientConfig
      */
-    public function setServiceIdentifier(string $serviceIdentifier, string ...$aliases): self
+    public function setServiceIdentifier(string $serviceIdentifier): self
     {
         $this->serviceIdentifier = $serviceIdentifier;
-        $this->serviceAliases = $aliases;
 
         return $this;
-    }
-
-    /**
-     * Get ServiceAliases
-     *
-     * @return \string[]
-     */
-    public function getServiceAliases(): array
-    {
-        return $this->serviceAliases;
     }
 
     /**

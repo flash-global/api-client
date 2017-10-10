@@ -16,7 +16,7 @@ interface ApiClientInterface
      * @return TransportInterface
      */
     public function getTransport();
-    
+
     /**
      * @param SyncTransportInterface $transport
      *

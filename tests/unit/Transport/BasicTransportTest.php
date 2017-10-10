@@ -3,10 +3,12 @@
 namespace Test\Fei\ApiClient\Transport;
 
 use Fei\ApiClient\RequestDescriptor;
-use Fei\ApiClient\Response;
 use Fei\ApiClient\ResponseDescriptor;
 use Fei\ApiClient\Transport\BasicTransport;
-use Guzzle\Http\Client;
+use Fei\ApiClient\Transport\Psr7\RequestFactory;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 class BasicTransportTest extends \Codeception\Test\Unit
 {
@@ -19,14 +21,25 @@ class BasicTransportTest extends \Codeception\Test\Unit
     {
         
         $transport = new BasicTransport();
-        $response = new \Guzzle\Http\Message\Response(200, null, '{"code": 10, "data": {"key": "value"}}');
+        $requestDescriptor = new RequestDescriptor();
+
+
+
+        $factoryMock = $this->getMockBuilder(RequestFactory::class)->setMethods(['create'])->getMock();
+
+        $response = new Response(200, [], '{"code": 10, "data": {"key": "value"}}');
         $client = $this->createMock(Client::class);
-        $client->expects($this->once())->method('createRequest')->with('GET', 'http://test.com/api/test', array('x' => 'y'));
         $client->expects($this->once())->method('send')->willReturn($response);
 
-        $transport->setClient($client);
+        $request = new Request(
+            'GET',
+            'http://test.com/api/test',
+            array('x' => 'y')
+        );
+        $factoryMock->expects($this->once())->method('create')->with($requestDescriptor)->willReturn($request);
 
-        $requestDescriptor = new RequestDescriptor();
+        $transport->setRequestFactory($factoryMock);
+        $transport->setClient($client);
         
         $requestDescriptor->setMethod('GET');
         $requestDescriptor->setUrl('http://test.com/api/test');
@@ -37,5 +50,22 @@ class BasicTransportTest extends \Codeception\Test\Unit
         $this->assertInstanceOf(ResponseDescriptor::class, $response);
         $this->assertEquals($client, $transport->getClient());
 
+    }
+
+    public function testAccessorsRequestFactory()
+    {
+        $this->testOneAccessors('requestFactory', new RequestFactory());
+    }
+
+    protected function testOneAccessors($name, $expected)
+    {
+        $setter = 'set' . ucfirst($name);
+        $getter = 'get' . ucfirst($name);
+
+        $basicTransport = new BasicTransport();
+        $basicTransport->$setter($expected);
+
+        $this->assertEquals($basicTransport->$getter(), $expected);
+        $this->assertAttributeEquals($basicTransport->$getter(), $name, $basicTransport);
     }
 }

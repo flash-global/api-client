@@ -1,117 +1,145 @@
 <?php
-    
-    namespace Fei\ApiClient\Transport;
-    
-    
-    use Fei\ApiClient\ApiClientException;
-    use Fei\ApiClient\RequestDescriptor;
-    use Fei\ApiClient\ResponseDescriptor;
-    use Guzzle\Service\Client;
-    
+
+namespace Fei\ApiClient\Transport;
+
+use Fei\ApiClient\ApiClientException;
+use Fei\ApiClient\RequestDescriptor;
+use Fei\ApiClient\ResponseDescriptor;
+use Fei\ApiClient\Transport\Psr7\RequestFactory;
+use GuzzleHttp\Client;
+use function GuzzleHttp\Promise\unwrap;
+
+/**
+ * Class BasicTransport
+ *
+ * @package Fei\ApiClient\Transport
+ */
+class BasicTransport implements SyncTransportInterface
+{
     /**
-     * Class BasicTransport
-     *
-     * @package Fei\ApiClient\Transport
+     * @var Client
      */
-    class BasicTransport implements SyncTransportInterface
+    protected $client;
+
+    /**
+     * @var RequestFactory
+     */
+    protected $requestFactory;
+
+    /**
+     * @var array
+     */
+    protected $clientOptions = array();
+
+    /**
+     * BasicTransport constructor.
+     *
+     * @param array $options
+     */
+    public function __construct($options = array())
     {
-        /**
-         * @var Client
-         */
-        protected $client;
-        
-        protected $clientOptions = array();
-        
-        /**
-         * BasicTransport constructor.
-         *
-         * @param array $options
-         */
-        public function __construct($options = array())
+        $this->clientOptions = $options;
+        $this->requestFactory = new RequestFactory();
+    }
+
+
+    /**
+     * @param RequestDescriptor $requestDescriptor
+     *
+     * @param int               $flags
+     *
+     * @return ResponseDescriptor
+     * @throws ApiClientException
+     * @throws \Exception
+     */
+    public function send(RequestDescriptor $requestDescriptor, $flags = 0)
+    {
+        try
         {
-            $this->clientOptions = $options;
+            $request = $this->getRequestFactory()->create($requestDescriptor);
+            $response = $this->getClient()->send($request);
+
+        } catch (\Exception $exception)
+        {
+            throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
         }
-        
-        /**
-         * @param RequestDescriptor $requestDescriptor
-         *
-         * @param int               $flags
-         *
-         * @return ResponseDescriptor
-         * @throws ApiClientException
-         * @throws \Exception
-         */
-        public function send(RequestDescriptor $requestDescriptor, $flags = 0)
+
+        $responseDescriptor = new ResponseDescriptor();
+        $responseDescriptor->setBody($response->getBody());
+        $responseDescriptor->setCode($response->getStatusCode());
+        $responseDescriptor->setHeaders($response->getHeaders());
+
+        return $responseDescriptor;
+    }
+
+    public function sendMany(array $requestDescriptors)
+    {
+        try
         {
-            try
+            $requests = [];
+            foreach ($requestDescriptors as $requestDescriptor)
             {
-                $request  = $this->getClient()
-                                 ->createRequest($requestDescriptor->getMethod(), $requestDescriptor->getUrl(), $requestDescriptor->getHeaders(), $requestDescriptor->getBodyParams())
-                ;
-                $response = $this->getClient()->send($request);
-                
-            } catch (\Exception $exception)
-            {
-                throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
-            }
-            
-            $responseDescriptor = new ResponseDescriptor();
-            $responseDescriptor->setBody($response->getBody());
-            $responseDescriptor->setCode($response->getStatusCode());
-            $responseDescriptor->setHeaders($response->getHeaders());
-            
-            return $responseDescriptor;
-        }
-        
-        public function sendMany(array $requestDescriptors)
-        {
-            try
-            {
-                $requests = array();
-                
-                foreach ($requestDescriptors as $requestDescriptor)
-                {
-                    list($request, $params) = $requestDescriptor;
-                    
-                    if (!$request instanceof RequestDescriptor)
-                    {
-                        throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
-                    }
-                    
-                    $requests[] = $this->getClient()->createRequest($request->getMethod(), $request->getUrl(),
-                        $request->getHeaders(), $request->getBodyParams())
-                    ;
+                list($request, $params) = $requestDescriptor;
+                if (!$request instanceof RequestDescriptor) {
+                    throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
                 }
-                
-                $this->getClient()->send($requests);
-            } catch (\Exception $exception)
-            {
-                throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
+                $requests[] = $this->getClient()->sendAsync($this->getRequestFactory()->create($request));
             }
-        }
-        
-        /**
-         * @return Client
-         */
-        public function getClient()
+
+            unwrap($requests);
+
+        } catch (\Exception $exception)
         {
-            if (is_null($this->client))
-            {
-                $this->client = new Client($this->clientOptions);
-            }
-            
-            return $this->client;
-        }
-        
-        /**
-         * @param Client $client
-         *
-         * @return $this
-         */
-        public function setClient($client)
-        {
-            $this->client = $client;
-            
-            return $this;
+            throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
         }
     }
+
+    /**
+     * @return Client
+     */
+    public function getClient()
+    {
+        if (is_null($this->client))
+        {
+            $this->client = new Client($this->clientOptions);
+        }
+
+        return $this->client;
+    }
+
+    /**
+     * @param Client $client
+     *
+     * @return $this
+     */
+    public function setClient($client)
+    {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    /**
+     * Get RequestFactory
+     *
+     * @return RequestFactory
+     */
+    public function getRequestFactory()
+    {
+        return $this->requestFactory;
+    }
+
+    /**
+     * Set RequestFactory
+     *
+     * @param RequestFactory $requestFactory
+     *
+     * @return $this
+     */
+    public function setRequestFactory(RequestFactory $requestFactory)
+    {
+        $this->requestFactory = $requestFactory;
+
+        return $this;
+    }
+}

@@ -11,23 +11,35 @@ use GuzzleHttp\Exception\RequestException;
 class ApiClientException extends \Exception
 {
     /**
+     * @var RequestException
+     */
+    protected $requestException;
+
+    /**
      * Return the response body of the exception
      *
-     * @param \Exception|null $exception
-     * @return null|\Psr\Http\Message\ResponseInterface
+     * @return null|RequestException
      */
-    public function getBadResponse(\Exception $exception = null)
+    public function getRequestException()
     {
-        $previous = is_null($exception) ? $this->getPrevious() : $exception;
-
-        if (is_null($previous)) {
-            return null;
+        if (!is_null($this->requestException)) {
+            return $this->requestException;
         }
 
-        if ($previous instanceof RequestException) {
-            return $previous->getResponse();
-        }
+        $search = function (\Exception $exception = null) use (&$search) {
+            $previous = $exception->getPrevious();
 
-        return $this->getBadResponse($previous);
+            if (is_null($previous)) {
+                return null;
+            }
+
+            if ($previous instanceof RequestException) {
+                return $this->requestException = $previous;
+            }
+
+            return $search($previous);
+        };
+
+        return $search($this);
     }
 }

@@ -52,7 +52,7 @@
                 
             } catch (\Exception $exception)
             {
-                throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
+                throw new ApiClientException('An error occurred while transporting a request: ' . $exception->getMessage(), $exception->getCode(), $exception);
             }
             
             $responseDescriptor = new ResponseDescriptor();
@@ -86,7 +86,7 @@
                 $this->getClient()->send($requests);
             } catch (\Exception $exception)
             {
-                throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
+                throw new ApiClientException('An error occurred while transporting a request: ' . $exception->getMessage(), $exception->getCode(), $exception);
             }
         }
         

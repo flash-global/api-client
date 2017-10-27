@@ -7,7 +7,6 @@ use Fei\ApiClient\RequestDescriptor;
 use Fei\ApiClient\ResponseDescriptor;
 use Fei\ApiClient\Transport\Psr7\RequestFactory;
 use GuzzleHttp\Client;
-use function GuzzleHttp\Promise\unwrap;
 
 /**
  * Class BasicTransport
@@ -86,7 +85,7 @@ class BasicTransport implements SyncTransportInterface
                 $requests[] = $this->getClient()->sendAsync($this->getRequestFactory()->create($request));
             }
 
-            unwrap($requests);
+            \GuzzleHttp\Promise\unwrap($requests);
 
         } catch (\Exception $exception)
         {

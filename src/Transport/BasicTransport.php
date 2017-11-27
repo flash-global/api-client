@@ -78,14 +78,14 @@ class BasicTransport implements SyncTransportInterface
             $requests = [];
             foreach ($requestDescriptors as $requestDescriptor)
             {
-                list($request, $params) = $requestDescriptor;
+                list($request, $params) = [$requestDescriptor, $requestDescriptor->getParams()];
                 if (!$request instanceof RequestDescriptor) {
                     throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
                 }
                 $requests[] = $this->getClient()->sendAsync($this->getRequestFactory()->create($request));
             }
 
-            \GuzzleHttp\Promise\unwrap($requests);
+            return \GuzzleHttp\Promise\unwrap($requests);
 
         } catch (\Exception $exception)
         {

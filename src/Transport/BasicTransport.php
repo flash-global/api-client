@@ -78,8 +78,7 @@ class BasicTransport implements SyncTransportInterface
             $requests = [];
             foreach ($requestDescriptors as $requestDescriptor)
             {
-                $RequestDescriptorParams = (method_exists($requestDescriptor, 'getParams')) ? $requestDescriptor->getParams() : $requestDescriptor;
-                list($request, $params) = [$requestDescriptor, $RequestDescriptorParams];
+                list($request, $params) = $requestDescriptor;
                 if (!$request instanceof RequestDescriptor) {
                     throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
                 }

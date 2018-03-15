@@ -25,5 +25,11 @@
       "Fei\\ApiClient\\": "src/"
     }
   },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://composer.flash-global.net/"
+    }
+  ],
   "bin": ["scripts/api-client-worker.php"]
 }

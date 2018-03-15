@@ -40,41 +40,30 @@ class BeanstalkProxyWorker
 
         $request = new RequestDescriptor(json_decode($job->getData(), true));
 
-        try
-        {
-            if ($mode && self::VERBOSE)
-            {
+        try {
+            if ($mode && self::VERBOSE) {
                 echo "\tRequesting API on " . $request->getUrl() . " using " . $request->getMethod() . " method". PHP_EOL;
             }
             $response = $this->getTransport()->send($request);
 
-            if (!$response || !$response->isSuccess())
-            {
+            if (!$response || !$response->isSuccess()) {
                 // TODO log issues?
                 throw new WorkerException(sprintf('Failed running job %d from %s (return code: %s)', $job->getId(), $this->getTube(), $response->getCode()));
             }
 
             $this->getPheanstalk()->delete($job);
-        }
-        catch (\Exception $e)
-        {
-            if($mode && self::VERBOSE)
-            {
+        } catch (\Exception $e) {
+            if ($mode && self::VERBOSE) {
                 echo "\t [ ERROR ] " . $e->getMessage() . PHP_EOL;
             }
 
-            if($e instanceof TransportException)
-            {
+            if ($e instanceof TransportException) {
                 // keep job in the active queue
-            }
-            else
-            {
+            } else {
                 // bury job until a solution is found
                 $this->getPheanstalk()->bury($job);
             }
-
         }
-
     }
 
     /**

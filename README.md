@@ -1,4 +1,6 @@
 # Api Client
+[![GitHub license](https://img.shields.io/github/license/flash-global/api-client.svg)](https://github.com/flash-global/api-client)![continuousphp](https://img.shields.io/continuousphp/git-hub/flash-global/api-client.svg)[![GitHub issues](https://img.shields.io/github/issues/flash-global/api-client.svg)](https://github.com/flash-global/api-client/issues)
+
 
 Low level API client.
 

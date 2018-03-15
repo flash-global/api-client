@@ -61,5 +61,4 @@ interface ApiClientInterface
      * @return ApiClientInterface
      */
     public function rollback();
-
 }

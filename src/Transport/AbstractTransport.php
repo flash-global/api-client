@@ -40,10 +40,8 @@ abstract class AbstractTransport implements TransportInterface
         $reflectedClient = new \ReflectionObject($this);
         $constants       = $reflectedClient->getConstants();
 
-        foreach ($constants as $constant => $value)
-        {
-            if (strpos($constant, 'OPTION_') === 0)
-            {
+        foreach ($constants as $constant => $value) {
+            if (strpos($constant, 'OPTION_') === 0) {
                 $this->availableOptions[] = $value;
             }
         }
@@ -56,8 +54,7 @@ abstract class AbstractTransport implements TransportInterface
      */
     public function setOptions(array $options)
     {
-        foreach ($options as $option => $value)
-        {
+        foreach ($options as $option => $value) {
             $this->setOption($option, $value);
         }
 
@@ -74,14 +71,12 @@ abstract class AbstractTransport implements TransportInterface
      */
     public function setOption($option, $value)
     {
-        if (in_array($option, $this->availableOptions))
-        {
+        if (in_array($option, $this->availableOptions)) {
             $this->$option = $value;
 
             return $this;
         }
 
         throw new ApiClientException(sprintf('Trying to set unknown option "%s" on %s ', $option, get_class()));
-
     }
 }

@@ -34,8 +34,7 @@ class BeanstalkProxyTransport extends AbstractTransport implements AsyncTranspor
         $pheanstalk = $this->getPheanstalk();
         $connection = $pheanstalk->getConnection();
 
-        if (!$connection->isServiceListening())
-        {
+        if (!$connection->isServiceListening()) {
             throw new TransportException(sprintf('No beanstalk server is currently listening on %s:%s', $connection->getHost(), $connection->getPort()));
         }
 
@@ -46,8 +45,7 @@ class BeanstalkProxyTransport extends AbstractTransport implements AsyncTranspor
 
     public function sendMany(array $requests)
     {
-        foreach ($requests as $request)
-        {
+        foreach ($requests as $request) {
             $this->send($request);
         }
 

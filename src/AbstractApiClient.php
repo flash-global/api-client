@@ -99,10 +99,8 @@ abstract class AbstractApiClient implements ApiClientInterface
         $reflectedClient = new \ReflectionObject($this);
         $constants       = $reflectedClient->getConstants();
 
-        foreach ($constants as $constant => $value)
-        {
-            if(strpos($constant, 'OPTION_') === 0)
-            {
+        foreach ($constants as $constant => $value) {
+            if (strpos($constant, 'OPTION_') === 0) {
                 $this->availableOptions[] = $value;
             }
         }
@@ -115,8 +113,7 @@ abstract class AbstractApiClient implements ApiClientInterface
      */
     public function setOptions(array $options)
     {
-        foreach ($options as $option => $value)
-        {
+        foreach ($options as $option => $value) {
             $this->setOption($option, $value);
         }
 
@@ -133,8 +130,7 @@ abstract class AbstractApiClient implements ApiClientInterface
      */
     public function setOption($option, $value)
     {
-        if(in_array($option, $this->availableOptions))
-        {
+        if (in_array($option, $this->availableOptions)) {
             $method = sprintf('set%s', ucfirst($option));
             if (method_exists($this, $method)) {
                 $this->$method($value);
@@ -146,7 +142,6 @@ abstract class AbstractApiClient implements ApiClientInterface
         }
 
         throw new ApiClientException(sprintf('Trying to set unknown option "%s" on %s ', $option, get_class($this)));
-
     }
 
 
@@ -160,20 +155,18 @@ abstract class AbstractApiClient implements ApiClientInterface
      */
     public function getOption($option, $default = null)
     {
-        if(in_array($option, $this->availableOptions))
-        {
+        if (in_array($option, $this->availableOptions)) {
             $method = 'get' . ucfirst($option);
             if (method_exists($this, $method)) {
                 return $this->$method();
-            } elseif(!empty($this->$option)) {
+            } elseif (!empty($this->$option)) {
                 return $this->$option;
             }
 
             return $default;
+        } else {
+            throw new ApiClientException(sprintf('Trying to get unknown option "%s" on %s ', $option, get_class($this)));
         }
-
-        else throw new ApiClientException(sprintf('Trying to get unknown option "%s" on %s ', $option, get_class($this)));
-
     }
 
     /**
@@ -184,10 +177,8 @@ abstract class AbstractApiClient implements ApiClientInterface
         $this->begin();
 
         $instance = $this;
-        register_shutdown_function(function () use ($instance)
-        {
-            if ($instance->getTransport() && !empty($instance->delayedRequests) && $instance->autoCommit)
-            {
+        register_shutdown_function(function () use ($instance) {
+            if ($instance->getTransport() && !empty($instance->delayedRequests) && $instance->autoCommit) {
                 $instance->commit();
             }
         });
@@ -246,21 +237,15 @@ abstract class AbstractApiClient implements ApiClientInterface
         $data   = $response->getData();
         $entity = array();
 
-        if (!empty($class))
-        {
-
-            if (isset($data[0]) && is_array($data[0]))
-            {
-                foreach ($data as $resource)
-                {
+        if (!empty($class)) {
+            if (isset($data[0]) && is_array($data[0])) {
+                foreach ($data as $resource) {
                     /** @var EntityInterface $entity */
                     $subEntity = new $class;
                     $entity->hydrate($resource);
                     $entity[] = $subEntity;
                 }
-            }
-            else
-            {
+            } else {
 
                 /** @var EntityInterface $entity */
                 $entity = new $class;
@@ -334,18 +319,15 @@ abstract class AbstractApiClient implements ApiClientInterface
      */
     public function send(RequestDescriptor $request, $flags = 0)
     {
-        if ($this->delayNext || $this->isDelayed)
-        {
-            if(!$this->forceNext)
-            {
+        if ($this->delayNext || $this->isDelayed) {
+            if (!$this->forceNext) {
                 $this->delayedRequests[] = array($request, $flags | ApiRequestOption::NO_RESPONSE);
 
                 // reset stackNext flag
                 $this->delayNext = false;
 
                 return true;
-            }
-            else {
+            } else {
                 // reset forceNext flag
                 $this->forceNext = false;
             }
@@ -357,18 +339,13 @@ abstract class AbstractApiClient implements ApiClientInterface
             throw new ApiClientException(sprintf('No transport has been set on "%s"', get_class()));
         }
 
-        try
-        {
+        try {
             $response = $transport->send($request, $flags);
-        }
-        catch(TransportException $e)
-        {
+        } catch (TransportException $e) {
             // fallback?
-            if($fallback = $this->getFallbackTransport())
-            {
+            if ($fallback = $this->getFallbackTransport()) {
                 $response = $fallback->send($request, $flags);
-            }
-            else {
+            } else {
                 throw $e;
             }
         }
@@ -388,23 +365,17 @@ abstract class AbstractApiClient implements ApiClientInterface
      */
     protected function getAppropriateTransport($flags)
     {
-        if ($flags & ApiRequestOption::NO_RESPONSE)
-        {
+        if ($flags & ApiRequestOption::NO_RESPONSE) {
             $transport = $this->getAsyncTransport();
-            if (is_null($transport))
-            {
+            if (is_null($transport)) {
                 $transport = $this->getTransport();
-            }
-            else {
+            } else {
                 $fallback = $this->getTransport();
-                if($fallback)
-                {
+                if ($fallback) {
                     $this->setFallbackTransport($fallback);
                 }
             }
-        }
-        else
-        {
+        } else {
             $transport = $this->getTransport();
         }
 
@@ -438,8 +409,7 @@ abstract class AbstractApiClient implements ApiClientInterface
     {
         $this->isDelayed = false;
 
-        if (!empty($this->delayedRequests))
-        {
+        if (!empty($this->delayedRequests)) {
             $this->sendMany($this->delayedRequests);
         }
 

@@ -95,8 +95,7 @@ class ResponseDescriptor
         $data = '';
         $body = json_decode($this->body, true);
 
-        if (!empty($body) && isset($body['data']))
-        {
+        if (!empty($body) && isset($body['data'])) {
             $data = $body['data'];
         }
 
@@ -113,15 +112,10 @@ class ResponseDescriptor
         $meta = '';
         $body = json_decode($this->body, true);
 
-        if (!empty($body) && isset($body['meta']))
-        {
-
-            if (!empty($key) && isset($body['meta'][$key]))
-            {
+        if (!empty($body) && isset($body['meta'])) {
+            if (!empty($key) && isset($body['meta'][$key])) {
                 $meta = $body['meta'][$key];
-            }
-            else
-            {
+            } else {
                 $meta = $body['meta'];
             }
         }
@@ -140,7 +134,7 @@ class ResponseDescriptor
     /**
      * @return array
      */
-    function toArray()
+    public function toArray()
     {
         return get_object_vars($this);
     }

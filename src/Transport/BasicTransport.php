@@ -53,13 +53,10 @@ class BasicTransport implements SyncTransportInterface
      */
     public function send(RequestDescriptor $requestDescriptor, $flags = 0)
     {
-        try
-        {
+        try {
             $request = $this->getRequestFactory()->create($requestDescriptor);
             $response = $this->getClient()->send($request);
-
-        } catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
         }
 
@@ -73,11 +70,9 @@ class BasicTransport implements SyncTransportInterface
 
     public function sendMany(array $requestDescriptors)
     {
-        try
-        {
+        try {
             $requests = [];
-            foreach ($requestDescriptors as $requestDescriptor)
-            {
+            foreach ($requestDescriptors as $requestDescriptor) {
                 list($request, $params) = $requestDescriptor;
                 if (!$request instanceof RequestDescriptor) {
                     throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
@@ -86,9 +81,7 @@ class BasicTransport implements SyncTransportInterface
             }
 
             return \GuzzleHttp\Promise\unwrap($requests);
-
-        } catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
         }
     }
@@ -98,8 +91,7 @@ class BasicTransport implements SyncTransportInterface
      */
     public function getClient()
     {
-        if (is_null($this->client))
-        {
+        if (is_null($this->client)) {
             $this->client = new Client($this->clientOptions);
         }
 

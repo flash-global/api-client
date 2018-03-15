@@ -48,8 +48,7 @@ class RequestDescriptor
      */
     public function __construct($data = null)
     {
-        if(!is_null($data))
-        {
+        if (!is_null($data)) {
             $this->hydrate($data);
         }
     }
@@ -62,22 +61,19 @@ class RequestDescriptor
      */
     public function hydrate($data)
     {
-        if($data instanceof \ArrayObject)
-        {
+        if ($data instanceof \ArrayObject) {
             $data = $data->getArrayCopy();
         }
 
-        if($data instanceof \Iterator)
-        {
+        if ($data instanceof \Iterator) {
             $data = iterator_to_array($data);
         }
 
-        if(!is_array($data)) {
+        if (!is_array($data)) {
             throw new ApiClientException('RequestDescriptor need an array, ArrayObject or Iterator instance to get hydrated');
         }
 
-        foreach($data as $property => $value)
-        {
+        foreach ($data as $property => $value) {
             $setter = 'set' . ucfirst($property);
 
             $this->$setter($value);

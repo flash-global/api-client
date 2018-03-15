@@ -2,7 +2,6 @@
 
 namespace Fei\ApiClient\Transport;
 
-
 use Amp\Artax\Client as AmpClient;
 use Amp\Artax\FormBody;
 use Amp\Artax\Request as AmpRequest;
@@ -47,8 +46,7 @@ class AsyncTransport implements AsyncTransportInterface
      */
     public function getClient()
     {
-        if(is_null($this->client))
-        {
+        if (is_null($this->client)) {
             $this->client = new AmpClient();
             $this->client->setAllOptions($this->clientOptions);
         }
@@ -72,12 +70,10 @@ class AsyncTransport implements AsyncTransportInterface
     {
         $requests = array();
 
-        foreach ($requestDescriptors as $requestDescriptor)
-        {
+        foreach ($requestDescriptors as $requestDescriptor) {
             list($request, $params) = $requestDescriptor;
 
-            if(!$request instanceof RequestDescriptor)
-            {
+            if (!$request instanceof RequestDescriptor) {
                 throw new ApiClientException('Invalid parameter. sendMany only accept array of RequestDescriptor.');
             }
 
@@ -121,16 +117,15 @@ class AsyncTransport implements AsyncTransportInterface
 
         $responseDescriptor = new ResponseDescriptor();
 
-        if($flags & ApiRequestOption::NO_RESPONSE)
-        {
+        if ($flags & ApiRequestOption::NO_RESPONSE) {
             $this->promises[] = $promise;
             return null;
         }
 
         /** @var Response $response */
-        try{
+        try {
             $response = \Amp\wait($promise);
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             die($request->getBody());
         }
 
@@ -143,21 +138,17 @@ class AsyncTransport implements AsyncTransportInterface
 
     protected function handleBody($body)
     {
-        if(is_array($body))
-        {
+        if (is_array($body)) {
             $handledBody = new FormBody();
             $handledBody->addFields($body);
-        }else{
+        } else {
             $handledBody = $body;
         }
         return $handledBody;
-
     }
 
-    function __destruct()
+    public function __destruct()
     {
-       \Amp\wait(\Amp\all($this->promises));
+        \Amp\wait(\Amp\all($this->promises));
     }
-
-
 }

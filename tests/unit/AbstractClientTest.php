@@ -12,10 +12,9 @@ use Fei\ApiClient\Transport\AsyncTransportInterface;
 use Fei\ApiClient\Transport\SyncTransportInterface;
 use Fei\ApiClient\Transport\TransportException;
 use Fei\Entity\AbstractEntity;
-use Tests\Fei\ApiClient\MotherObject\TestClient;
 use UnitTester;
 
-use Tests\Fei\ApiClient\MotherObject\TestEntity;
+
 
 class ClientTest extends Unit
 {
@@ -307,7 +306,7 @@ class ClientTest extends Unit
     {
         $optionsValue = [
             AbstractApiClient::OPTION_BASEURL              => 'http://base-url.com',
-            AbstractApiClient::OPTION_HEADER_AUTHORISATION => 'authorizationHeaderValue'
+            AbstractApiClient::OPTION_HEADER_AUTHORIZATION => 'authorizationHeaderValue'
         ];
         /** @var AbstractApiClient $client */
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [$optionsValue], '', true, true, true, ['commit']);
@@ -316,9 +315,9 @@ class ClientTest extends Unit
         $this->assertEquals('http://base-url.com/', $client->getBaseUrl());
         $this->assertEquals('http://base-url.com/', $client->getOption(AbstractApiClient::OPTION_BASEURL));
 
-        $this->assertAttributeEquals('authorizationHeaderValue', 'Authorization', $client);
+        $this->assertAttributeEquals('authorizationHeaderValue', 'authorization', $client);
         $this->assertEquals('authorizationHeaderValue', $client->getAuthorization());
-        $this->assertEquals('authorizationHeaderValue', $client->getOption(AbstractApiClient::OPTION_HEADER_AUTHORISATION));
+        $this->assertEquals('authorizationHeaderValue', $client->getOption(AbstractApiClient::OPTION_HEADER_AUTHORIZATION));
     }
 
     public function testOptionsInitialization()
@@ -394,5 +393,39 @@ class ClientTest extends Unit
         $request = $this->createMock(RequestDescriptor::class);
 
         $client->send($request, ApiRequestOption::NO_RESPONSE);
+    }
+}
+
+class TestClient extends AbstractApiClient
+{
+    const OPTION_TEST = 'testOption';
+}
+
+class TestEntity extends AbstractEntity
+{
+    protected $id;
+
+    /**
+     * Get Id
+     *
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set Id
+     *
+     * @param mixed $id
+     *
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
     }
 }

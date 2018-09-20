@@ -12,7 +12,6 @@ parameters:
             triggered_by: ['php', 'inc', 'phtml']
             whitelist_patterns:
                 - /^src\/(.*)/
-                - /^tests\/unit\/(.*)/
         codeception:
             config_file: ~
             fail_fast: false

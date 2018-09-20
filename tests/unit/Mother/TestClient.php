@@ -1,5 +1,5 @@
 <?php
-namespace Tests\Fei\ApiClient\MotherObject;
+namespace Tests\Fei\ApiClient\Mother;
 
 use Fei\ApiClient\AbstractApiClient;
 

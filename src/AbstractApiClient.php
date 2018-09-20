@@ -330,9 +330,7 @@ abstract class AbstractApiClient implements ApiClientInterface
     public function send(RequestDescriptor $request, $flags = 0)
     {
         if(!empty($this->getAuthorization())) {
-            $request->setHeaders([
-                'Authorization' => $this->getAuthorization()
-            ]);
+            $request->addHeader('Autorization', $this->getAuthorization());
         }
 
         if ($this->delayNext || $this->isDelayed) {

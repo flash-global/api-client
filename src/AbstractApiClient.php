@@ -24,7 +24,7 @@ abstract class AbstractApiClient implements ApiClientInterface
     /**
      * add api key on this header
      */
-    const OPTION_HEADER_AUTHORISATION = 'authorization';
+    const OPTION_HEADER_AUTHORISATION = 'Authorization';
 
     /**
      * @var string
@@ -329,8 +329,8 @@ abstract class AbstractApiClient implements ApiClientInterface
      */
     public function send(RequestDescriptor $request, $flags = 0)
     {
-        if(!empty($this->getAuthorization())) {
-            $request->addHeader('Autorization', $this->getAuthorization());
+        if (!empty($this->getAuthorization())) {
+            $request->addHeader(self::OPTION_HEADER_AUTHORISATION, $this->getAuthorization());
         }
 
         if ($this->delayNext || $this->isDelayed) {

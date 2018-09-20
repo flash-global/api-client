@@ -12,7 +12,10 @@ use Fei\ApiClient\Transport\AsyncTransportInterface;
 use Fei\ApiClient\Transport\SyncTransportInterface;
 use Fei\ApiClient\Transport\TransportException;
 use Fei\Entity\AbstractEntity;
+use Tests\Fei\ApiClient\MotherObject\TestClient;
 use UnitTester;
+
+use Tests\Fei\ApiClient\MotherObject\TestEntity;
 
 class ClientTest extends Unit
 {
@@ -24,7 +27,7 @@ class ClientTest extends Unit
 
     public function testTransportAccessors()
     {
-        $client = new TestClient;
+        $client = new TestClient();
 
         $this->assertNull($client->getTransport());
 
@@ -34,12 +37,11 @@ class ClientTest extends Unit
 
         $this->assertSame($transport, $client->getTransport());
         $this->assertAttributeSame($transport, 'transport', $client);
-
     }
 
     public function testAsyncTransportAccessors()
     {
-        $client = new TestClient;
+        $client = new TestClient();
 
         $this->assertNull($client->getAsyncTransport());
 
@@ -49,7 +51,6 @@ class ClientTest extends Unit
 
         $this->assertSame($transport, $client->getAsyncTransport());
         $this->assertAttributeSame($transport, 'asyncTransport', $client);
-
     }
 
     public function testBaseUrlAccessors()
@@ -62,7 +63,6 @@ class ClientTest extends Unit
 
         $client->setBaseUrl('http://test.com/');
         $this->assertEquals('http://test.com/', $client->getBaseUrl());
-
     }
 
     public function testCallingStackMethodMakesSubsequentSendCallsStackingRequests()
@@ -94,7 +94,6 @@ class ClientTest extends Unit
         // ASSERT
         $this->assertAttributeEquals(false, 'delayNext', $client);
         $this->assertAttributeEquals([[$request, ApiRequestOption::NO_RESPONSE]], 'delayedRequests', $client);
-
     }
 
     public function testSendMethodProxiesCallToTransportSendMethod()
@@ -108,7 +107,6 @@ class ClientTest extends Unit
 
         // RUN
         $client->send($request);
-
     }
 
     public function testCallingSendWithoutHavingSetASyncTransportThrowsAnException()
@@ -120,7 +118,6 @@ class ClientTest extends Unit
 
         // RUN
         $client->send($request);
-
     }
 
     public function testSendMethodProxiesCallToAsyncTransportSendMethodWhenUsingNoResponseFlag()
@@ -134,7 +131,6 @@ class ClientTest extends Unit
 
         // RUN
         $client->send($request, ApiRequestOption::NO_RESPONSE);
-
     }
 
     public function testAsyncRequestsAreFallingBackToSyncTransportWhenNoAsyncTransportIsSet()
@@ -148,7 +144,6 @@ class ClientTest extends Unit
 
         // RUN
         $client->send($request, ApiRequestOption::NO_RESPONSE);
-
     }
 
 
@@ -321,7 +316,7 @@ class ClientTest extends Unit
         $this->assertEquals('http://base-url.com/', $client->getBaseUrl());
         $this->assertEquals('http://base-url.com/', $client->getOption(AbstractApiClient::OPTION_BASEURL));
 
-        $this->assertAttributeEquals('authorizationHeaderValue', 'authorization', $client);
+        $this->assertAttributeEquals('authorizationHeaderValue', 'Authorization', $client);
         $this->assertEquals('authorizationHeaderValue', $client->getAuthorization());
         $this->assertEquals('authorizationHeaderValue', $client->getOption(AbstractApiClient::OPTION_HEADER_AUTHORISATION));
     }
@@ -362,7 +357,6 @@ class ClientTest extends Unit
         $request = $this->createMock(RequestDescriptor::class);
 
         $client->send($request, ApiRequestOption::NO_RESPONSE);
-
     }
 
     public function testNoFallbackTransport()
@@ -400,42 +394,5 @@ class ClientTest extends Unit
         $request = $this->createMock(RequestDescriptor::class);
 
         $client->send($request, ApiRequestOption::NO_RESPONSE);
-
-    }
-
-
-}
-
-class TestClient extends AbstractApiClient
-{
-    const OPTION_TEST = 'testOption';
-}
-
-class TestEntity extends AbstractEntity
-{
-    protected $id;
-
-    /**
-     * Get Id
-     *
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set Id
-     *
-     * @param mixed $id
-     *
-     * @return $this
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
     }
 }

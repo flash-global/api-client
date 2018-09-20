@@ -14,6 +14,8 @@ use Fei\ApiClient\Transport\TransportException;
 use Fei\Entity\AbstractEntity;
 use UnitTester;
 
+
+
 class ClientTest extends Unit
 {
     /**
@@ -24,7 +26,7 @@ class ClientTest extends Unit
 
     public function testTransportAccessors()
     {
-        $client = new TestClient;
+        $client = new TestClient();
 
         $this->assertNull($client->getTransport());
 
@@ -34,12 +36,11 @@ class ClientTest extends Unit
 
         $this->assertSame($transport, $client->getTransport());
         $this->assertAttributeSame($transport, 'transport', $client);
-
     }
 
     public function testAsyncTransportAccessors()
     {
-        $client = new TestClient;
+        $client = new TestClient();
 
         $this->assertNull($client->getAsyncTransport());
 
@@ -49,7 +50,6 @@ class ClientTest extends Unit
 
         $this->assertSame($transport, $client->getAsyncTransport());
         $this->assertAttributeSame($transport, 'asyncTransport', $client);
-
     }
 
     public function testBaseUrlAccessors()
@@ -62,7 +62,6 @@ class ClientTest extends Unit
 
         $client->setBaseUrl('http://test.com/');
         $this->assertEquals('http://test.com/', $client->getBaseUrl());
-
     }
 
     public function testCallingStackMethodMakesSubsequentSendCallsStackingRequests()
@@ -94,7 +93,6 @@ class ClientTest extends Unit
         // ASSERT
         $this->assertAttributeEquals(false, 'delayNext', $client);
         $this->assertAttributeEquals([[$request, ApiRequestOption::NO_RESPONSE]], 'delayedRequests', $client);
-
     }
 
     public function testSendMethodProxiesCallToTransportSendMethod()
@@ -108,7 +106,6 @@ class ClientTest extends Unit
 
         // RUN
         $client->send($request);
-
     }
 
     public function testCallingSendWithoutHavingSetASyncTransportThrowsAnException()
@@ -120,7 +117,6 @@ class ClientTest extends Unit
 
         // RUN
         $client->send($request);
-
     }
 
     public function testSendMethodProxiesCallToAsyncTransportSendMethodWhenUsingNoResponseFlag()
@@ -134,7 +130,6 @@ class ClientTest extends Unit
 
         // RUN
         $client->send($request, ApiRequestOption::NO_RESPONSE);
-
     }
 
     public function testAsyncRequestsAreFallingBackToSyncTransportWhenNoAsyncTransportIsSet()
@@ -148,7 +143,6 @@ class ClientTest extends Unit
 
         // RUN
         $client->send($request, ApiRequestOption::NO_RESPONSE);
-
     }
 
 
@@ -312,7 +306,7 @@ class ClientTest extends Unit
     {
         $optionsValue = [
             AbstractApiClient::OPTION_BASEURL              => 'http://base-url.com',
-            AbstractApiClient::OPTION_HEADER_AUTHORISATION => 'authorizationHeaderValue'
+            AbstractApiClient::OPTION_HEADER_AUTHORIZATION => 'authorizationHeaderValue'
         ];
         /** @var AbstractApiClient $client */
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [$optionsValue], '', true, true, true, ['commit']);
@@ -323,7 +317,7 @@ class ClientTest extends Unit
 
         $this->assertAttributeEquals('authorizationHeaderValue', 'authorization', $client);
         $this->assertEquals('authorizationHeaderValue', $client->getAuthorization());
-        $this->assertEquals('authorizationHeaderValue', $client->getOption(AbstractApiClient::OPTION_HEADER_AUTHORISATION));
+        $this->assertEquals('authorizationHeaderValue', $client->getOption(AbstractApiClient::OPTION_HEADER_AUTHORIZATION));
     }
 
     public function testOptionsInitialization()
@@ -362,7 +356,6 @@ class ClientTest extends Unit
         $request = $this->createMock(RequestDescriptor::class);
 
         $client->send($request, ApiRequestOption::NO_RESPONSE);
-
     }
 
     public function testNoFallbackTransport()
@@ -400,10 +393,7 @@ class ClientTest extends Unit
         $request = $this->createMock(RequestDescriptor::class);
 
         $client->send($request, ApiRequestOption::NO_RESPONSE);
-
     }
-
-
 }
 
 class TestClient extends AbstractApiClient

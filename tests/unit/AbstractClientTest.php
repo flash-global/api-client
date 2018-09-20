@@ -329,10 +329,10 @@ class ClientTest extends Unit
     public function testOptionsInitialization()
     {
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']], '', true, true, true, ['commit']);
-        $this->assertAttributeEquals(['baseUrl', 'authorization'], 'availableOptions', $client);
+        $this->assertAttributeEquals(['baseUrl', 'Authorization'], 'availableOptions', $client);
 
         $client = new TestClient();
-        $this->assertAttributeEquals(['testOption', 'baseUrl', 'authorization'], 'availableOptions', $client);
+        $this->assertAttributeEquals(['testOption', 'baseUrl', 'Authorization'], 'availableOptions', $client);
     }
 
     public function testSettingUnknownOptionThrowsAnException()

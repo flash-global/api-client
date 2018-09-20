@@ -24,7 +24,7 @@ abstract class AbstractApiClient implements ApiClientInterface
     /**
      * add api key on this header
      */
-    const OPTION_HEADER_AUTHORISATION = 'Authorization';
+    const OPTION_HEADER_AUTHORISATION = 'authorization';
 
     /**
      * @var string

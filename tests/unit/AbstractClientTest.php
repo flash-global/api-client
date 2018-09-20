@@ -310,21 +310,29 @@ class ClientTest extends Unit
 
     public function testOptionsHandling()
     {
+        $optionsValue = [
+            AbstractApiClient::OPTION_BASEURL              => 'http://base-url.com',
+            AbstractApiClient::OPTION_HEADER_AUTHORISATION => 'authorizationHeaderValue'
+        ];
         /** @var AbstractApiClient $client */
-        $client = $this->getMockForAbstractClass(AbstractApiClient::class, [[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']], '', true, true, true, ['commit']);
+        $client = $this->getMockForAbstractClass(AbstractApiClient::class, [$optionsValue], '', true, true, true, ['commit']);
 
         $this->assertAttributeEquals('http://base-url.com/', 'baseUrl', $client);
         $this->assertEquals('http://base-url.com/', $client->getBaseUrl());
         $this->assertEquals('http://base-url.com/', $client->getOption(AbstractApiClient::OPTION_BASEURL));
+
+        $this->assertAttributeEquals('authorizationHeaderValue', 'authorization', $client);
+        $this->assertEquals('authorizationHeaderValue', $client->getAuthorization());
+        $this->assertEquals('authorizationHeaderValue', $client->getOption(AbstractApiClient::OPTION_HEADER_AUTHORISATION));
     }
 
     public function testOptionsInitialization()
     {
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']], '', true, true, true, ['commit']);
-        $this->assertAttributeEquals(['baseUrl'], 'availableOptions', $client);
+        $this->assertAttributeEquals(['baseUrl', 'authorization'], 'availableOptions', $client);
 
         $client = new TestClient();
-        $this->assertAttributeEquals(['testOption', 'baseUrl'], 'availableOptions', $client);
+        $this->assertAttributeEquals(['testOption', 'baseUrl', 'authorization'], 'availableOptions', $client);
     }
 
     public function testSettingUnknownOptionThrowsAnException()

@@ -22,6 +22,16 @@ abstract class AbstractApiClient implements ApiClientInterface
     const OPTION_BASEURL = 'baseUrl';
 
     /**
+     * add api key on this header
+     */
+    const OPTION_HEADER_AUTHORISATION = 'Authorization';
+
+    /**
+     * @var string
+     */
+    protected $authorization;
+
+    /**
      * @var string
      */
     protected $baseUrl;
@@ -319,6 +329,12 @@ abstract class AbstractApiClient implements ApiClientInterface
      */
     public function send(RequestDescriptor $request, $flags = 0)
     {
+        if(!empty($this->getAuthorization())) {
+            $request->setHeaders([
+                'Authorization' => $this->getAuthorization()
+            ]);
+        }
+
         if ($this->delayNext || $this->isDelayed) {
             if (!$this->forceNext) {
                 $this->delayedRequests[] = array($request, $flags | ApiRequestOption::NO_RESPONSE);
@@ -479,6 +495,25 @@ abstract class AbstractApiClient implements ApiClientInterface
     public function resetFallbackTransport()
     {
         $this->fallbackTransport = null;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthorization()
+    {
+        return $this->authorization;
+    }
+
+    /**
+     * @param string $authorization
+     * @return AbstractApiClient
+     */
+    public function setAuthorization($authorization)
+    {
+        $this->authorization = $authorization;
 
         return $this;
     }

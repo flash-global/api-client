@@ -27,5 +27,9 @@
       "Fei\\ApiClient\\": "src/"
     }
   },
+  "repositories": {
+    "type": "git",
+    "url": "git@github.com:flash-global/entities.git"
+  },
   "bin": ["scripts/api-client-worker.php"]
 }

@@ -1,11 +1,22 @@
 namespace: Tests\Fei\ApiClient
+
 paths:
     tests: tests
     output: tests/_output
     data: tests/_data
     support: tests/_support
     envs: tests/_envs
+
+coverage:
+    enabled: true
+    remote: false
+    include:
+        - src/*
+    exclude:
+        - vendor/*
+
 actor_suffix: Tester
+
 extensions:
     enabled:
         - Codeception\Extension\RunFailed

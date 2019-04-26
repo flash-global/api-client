@@ -1,42 +1,37 @@
 #!/usr/bin/env php
 <?php
 
+use Fei\ApiClient\Constants;
 use Fei\ApiClient\Transport\BasicTransport;
 use Fei\ApiClient\Worker\BeanstalkProxyWorker;
 use Pheanstalk\Pheanstalk;
 
-$autoloadFiles = array(
-    __DIR__ . '/../vendor/autoload.php',
-    __DIR__ . '/../../../autoload.php'
-);
-
-foreach ($autoloadFiles as $autoloadFile) {
-    if (file_exists($autoloadFile)) {
-        require_once $autoloadFile;
-    }
-}
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // handle options
 
-$shortOptions = 'h:p:d:v';
-$longOptions = array('verbose', 'delay', 'host', 'port');
+$shortOptions = 'h:p:d:v:t';
+$longOptions = ['verbose', 'delay', 'host', 'port', 'tube'];
 
 $options = getopt($shortOptions, $longOptions);
 
-$host = isset($options['host']) ? $options['host'] : isset($options['h']) ? $options['h'] : 'localhost';
-$port = isset($options['port']) ? (int)$options['port'] : isset($options['p']) ? (int)$options['p'] : 11300;
+$host = $options['host'] ?? $options['h'] ?? 'localhost';
+$port = (int)($options['port'] ?? $options['p'] ?? 11300);
 $verbose = (isset($options['v']) || isset($options['verbose']));
-$delay = (isset($options['delay'])) ? (int)$options['delay'] : (isset($options['d'])) ? (int)$options['d'] : 3;
+$delay = (int)($options['delay'] ?? $options['d'] ?? 3);
+$tube = $options['tube'] ?? $options['t'] ?? Constants::DEFAULT_BEANSTALK_TUBE;
 
 $mode = ($verbose) ? BeanstalkProxyWorker::VERBOSE : 0;
 
 $pheanstalk = new Pheanstalk($host, $port);
 $transport = new BasicTransport();
-$worker = new BeanstalkProxyWorker();
-$worker->setPheanstalk($pheanstalk)->setTransport($transport);
+$worker = (new BeanstalkProxyWorker())
+    ->setPheanstalk($pheanstalk)
+    ->setTransport($transport)
+    ->setTube($tube);
 
 if ($mode & BeanstalkProxyWorker::VERBOSE) {
-    printf('Working on queue hosted on %s:%s, with delay between polls being %s seconds', $host, $port, $delay);
+    printf('Working on queue hosted on %s:%s, with delay between polls being %s seconds on tube %s', $host, $port, $delay, $tube);
     echo PHP_EOL;
 }
 

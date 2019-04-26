@@ -2,6 +2,7 @@
 
 namespace Fei\ApiClient\Transport;
 
+use Fei\ApiClient\Constants;
 use Fei\ApiClient\RequestDescriptor;
 use Pheanstalk\Pheanstalk;
 
@@ -12,7 +13,6 @@ use Pheanstalk\Pheanstalk;
  */
 class BeanstalkProxyTransport extends AbstractTransport implements AsyncTransportInterface
 {
-
     const OPTION_PHEANSTALK = 'pheanstalk';
     const OPTION_TUBE       = 'tube';
 
@@ -21,14 +21,17 @@ class BeanstalkProxyTransport extends AbstractTransport implements AsyncTranspor
      */
     protected $pheanstalk;
 
-
     /**
      * @var string
      */
-    protected $tube = 'api-requests';
+    protected $tube = Constants::DEFAULT_BEANSTALK_TUBE;
 
-
-
+    /**
+     * @param RequestDescriptor $requestDescriptor
+     * @param int $flags
+     * @return $this|\Fei\ApiClient\ResponseDescriptor
+     * @throws TransportException
+     */
     public function send(RequestDescriptor $requestDescriptor, $flags = 0)
     {
         $pheanstalk = $this->getPheanstalk();
@@ -43,6 +46,11 @@ class BeanstalkProxyTransport extends AbstractTransport implements AsyncTranspor
         return $this;
     }
 
+    /**
+     * @param array $requests
+     * @return $this|mixed
+     * @throws TransportException
+     */
     public function sendMany(array $requests)
     {
         foreach ($requests as $request) {

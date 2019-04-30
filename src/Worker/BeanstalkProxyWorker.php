@@ -2,6 +2,7 @@
 
 namespace Fei\ApiClient\Worker;
 
+use Fei\ApiClient\Constants;
 use Fei\ApiClient\RequestDescriptor;
 use Fei\ApiClient\Transport\SyncTransportInterface;
 use Fei\ApiClient\Transport\TransportException;
@@ -15,7 +16,6 @@ use Pheanstalk\Pheanstalk;
  */
 class BeanstalkProxyWorker
 {
-
     const VERBOSE = 1;
 
     /**
@@ -26,7 +26,7 @@ class BeanstalkProxyWorker
     /**
      * @var string
      */
-    protected $tube = 'api-requests';
+    protected $tube = Constants::DEFAULT_BEANSTALK_TUBE;
 
     /**
      * @var SyncTransportInterface

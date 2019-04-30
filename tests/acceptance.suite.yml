@@ -1,10 +1,9 @@
-
 class_name: AcceptanceTester
 modules:
     enabled:
-      - \Helper\Acceptance
-      - Queue:
-          type: 'beanstalkd'
-          host: '127.0.0.1'
-          port: 11300
-          timeout: 120
+        - \Tests\Fei\ApiClient\Helper\Acceptance
+        - Queue:
+              type: 'beanstalkd'
+              host: '127.0.0.1'
+              port: 11300
+              timeout: 120

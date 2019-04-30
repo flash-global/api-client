@@ -14,8 +14,6 @@ use Fei\ApiClient\Transport\TransportException;
 use Fei\Entity\AbstractEntity;
 use UnitTester;
 
-
-
 class ClientTest extends Unit
 {
     /**

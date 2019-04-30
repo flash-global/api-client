@@ -1,10 +1,12 @@
-actor: Tester
+namespace: Tests\Fei\ApiClient
+
 paths:
     tests: tests
-    log: tests/_output
+    output: tests/_output
     data: tests/_data
     support: tests/_support
     envs: tests/_envs
+
 coverage:
     enabled: true
     remote: false
@@ -12,11 +14,9 @@ coverage:
         - src/*
     exclude:
         - vendor/*
-settings:
-    bootstrap: _bootstrap.php
-    colors: true
-    memory_limit: 1024M
+
+actor_suffix: Tester
+
 extensions:
     enabled:
         - Codeception\Extension\RunFailed
-

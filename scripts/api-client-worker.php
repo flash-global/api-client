@@ -19,7 +19,7 @@ foreach ($autoloadFiles as $autoloadFile) {
 
 // handle options
 
-$shortOptions = 'h:p:d:v:t';
+$shortOptions = 'h:p:d:t:v';
 $longOptions = ['verbose', 'delay', 'host', 'port', 'tube'];
 
 $options = getopt($shortOptions, $longOptions);

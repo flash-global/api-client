@@ -3,6 +3,7 @@
 namespace Test\Fei\ApiClient;
 
 use Codeception\Test\Unit;
+use Fei\ApiClient\ApiClientException;
 use Fei\ApiClient\RequestDescriptor;
 use UnitTester;
 
@@ -60,14 +61,10 @@ class RequestDescriptorTest extends Unit
     {
         $request = new RequestDescriptor();
 
-        $this->assertEmpty($request->getHeaders());
-
         $requestHeaders = array('Accept' => 'text/plain', 'Accept-Charset' => 'UTF-8');
         $request->setHeaders($requestHeaders);
 
-        $this->assertSame($requestHeaders, $request->getHeaders());
-        $this->assertAttributeSame($requestHeaders, 'headers', $request);
-
+        $this->assertArraySubset($requestHeaders, $request->getHeaders());
     }
 
     public function testBodyAccessors()
@@ -132,7 +129,7 @@ class RequestDescriptorTest extends Unit
         $request->addHeader('Accept', 'text/plain');
         $request->addHeader('Accept-Charset', 'UTF-8');
 
-        $this->assertCount(2, $request->getHeaders());
+        $this->assertCount(3, $request->getHeaders());
         $this->assertEquals('text/plain', $request->getHeaders()['Accept']);
         $this->assertEquals('UTF-8', $request->getHeaders()['Accept-Charset']);
     }
@@ -146,6 +143,9 @@ class RequestDescriptorTest extends Unit
         $this->assertEquals('UTF-8', $request->getHeader('Accept-Charset'));
     }
 
+    /**
+     * @throws ApiClientException
+     */
     public function testToArrayConversionAndHydration()
     {
         $request = new RequestDescriptor();

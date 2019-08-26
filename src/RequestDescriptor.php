@@ -2,6 +2,9 @@
 
 namespace Fei\ApiClient;
 
+use ArrayObject;
+use Iterator;
+use LogicException;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -11,6 +14,8 @@ use Psr\Http\Message\StreamInterface;
  */
 class RequestDescriptor
 {
+    const HEADER_API_CLIENT_ORIGIN = 'X-Api-Client-Origin';
+
     /**
      * @var string
      */
@@ -45,12 +50,15 @@ class RequestDescriptor
      * RequestDescriptor constructor.
      *
      * @param null $data
+     * @throws ApiClientException
      */
     public function __construct($data = null)
     {
         if (!is_null($data)) {
             $this->hydrate($data);
         }
+
+        $this->addApiClientOriginHeaderIfNeeded();
     }
 
     /**
@@ -61,11 +69,11 @@ class RequestDescriptor
      */
     public function hydrate($data)
     {
-        if ($data instanceof \ArrayObject) {
+        if ($data instanceof ArrayObject) {
             $data = $data->getArrayCopy();
         }
 
-        if ($data instanceof \Iterator) {
+        if ($data instanceof Iterator) {
             $data = iterator_to_array($data);
         }
 
@@ -179,6 +187,7 @@ class RequestDescriptor
     public function setHeaders($headers)
     {
         $this->headers = $headers;
+        $this->addApiClientOriginHeaderIfNeeded();
 
         return $this;
     }
@@ -291,7 +300,7 @@ class RequestDescriptor
         $bodyParams= $this->getBodyParams();
 
         if (!empty($rawParam) && !empty($bodyParams)) {
-            throw new \LogicException('The body param and raw data can not be both filled');
+            throw new LogicException('The body param and raw data can not be both filled');
         }
 
         if (!empty($bodyParams)) {
@@ -303,5 +312,34 @@ class RequestDescriptor
         }
 
         return null;
+    }
+
+    protected function addApiClientOriginHeaderIfNeeded()
+    {
+        if (empty($this->headers[self::HEADER_API_CLIENT_ORIGIN])) {
+            $this->headers[self::HEADER_API_CLIENT_ORIGIN] = $this->buildApiClientOrigin();
+        }
+    }
+
+    /**
+     * @return string
+     */
+    protected function buildApiClientOrigin(): string
+    {
+        if (!empty($_SERVER['REQUEST_URI'])) {
+            return $_SERVER['REQUEST_URI'];
+        }
+
+        $origin = '';
+
+        if (!empty(getcwd())) {
+            $origin .= getcwd();
+        }
+
+        if (!empty($_SERVER['argv'])) {
+            $origin .= ' ' . implode(' ', $_SERVER['argv']);
+        }
+
+        return $origin;
     }
 }

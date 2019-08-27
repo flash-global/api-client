@@ -51,7 +51,7 @@ while (true) {
         if ($return > 0) {
             sleep($delay);
         }
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         if ($mode & BeanstalkProxyWorker::VERBOSE) {
             echo "\t [ ERROR ]" . $e->getMessage() . PHP_EOL;
         }

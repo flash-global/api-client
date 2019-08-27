@@ -52,7 +52,7 @@ class BeanstalkProxyWorker
             }
 
             $this->getPheanstalk()->delete($job);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($mode && self::VERBOSE) {
                 echo "\t [ ERROR ] " . $e->getMessage() . PHP_EOL;
             }

@@ -326,14 +326,14 @@ class RequestDescriptor
      */
     protected function buildApiClientOrigin(): string
     {
-        if (!empty($_SERVER['REQUEST_URI'])) {
-            return $_SERVER['REQUEST_URI'];
+        if (!empty($_SERVER['HTTP_HOST'])) {
+            return $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         }
 
         $origin = '';
 
-        if (!empty(getcwd())) {
-            $origin .= getcwd();
+        if (!empty($_SERVER['SCRIPT_FILENAME'])) {
+            $origin .= $_SERVER['SCRIPT_FILENAME'];
         }
 
         if (!empty($_SERVER['argv'])) {

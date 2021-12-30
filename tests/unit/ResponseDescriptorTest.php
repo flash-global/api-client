@@ -22,42 +22,45 @@ class ResponseDescriptorTest extends Unit
     public function testCodeAccessors()
     {
         $response = new TestResponse();
-
+        $code = (new \ReflectionObject($response))->getProperty('code');
+        $code->setAccessible(true);
         $this->assertNull($response->getCode());
 
         $response->setCode(200);
 
         $this->assertTrue(is_int($response->getCode()));
-        $this->assertGreaterThanOrEqual(100,$response->getCode());
-        $this->assertLessThanOrEqual(599,$response->getCode());
-        $this->assertEquals(200,$response->getCode());
-        $this->assertAttributeEquals(200,'code',$response);
+        $this->assertGreaterThanOrEqual(100, $response->getCode());
+        $this->assertLessThanOrEqual(599, $response->getCode());
+        $this->assertEquals(200, $response->getCode());
+        $this->assertEquals(200, $code->getValue($response));
     }
 
     public function testHeadersAccessors()
     {
         $response = new TestResponse();
-
+        $headers = (new \ReflectionObject($response))->getProperty('headers');
+        $headers->setAccessible(true);
         $this->assertEmpty($response->getHeaders());
 
-        $responseHeaders = array('Pragma' => 'no-cache', 'Retry-After' => 120);
+        $responseHeaders = ['Pragma' => 'no-cache', 'Retry-After' => 120];
         $response->setHeaders($responseHeaders);
 
         $this->assertSame($responseHeaders, $response->getHeaders());
-        $this->assertAttributeSame($responseHeaders,'headers',$response);
+        $this->assertSame($responseHeaders, $headers->getValue($response));
 
     }
 
     public function testBodyAccessors()
     {
         $response = new TestResponse();
-
+        $body = (new \ReflectionObject($response))->getProperty('body');
+        $body->setAccessible(true);
         $this->assertEmpty($response->getBody());
 
         $response->setBody('The body');
 
-        $this->assertEquals('The body',$response->getBody());
-        $this->assertAttributeEquals('The body','body',$response);
+        $this->assertEquals('The body', $response->getBody());
+        $this->assertEquals('The body', $body->getValue($response));
     }
 
     public function testDataAccessors()
@@ -77,10 +80,10 @@ class ResponseDescriptorTest extends Unit
 
         $this->assertEmpty($response->getMeta());
 
-        $response->setBody(json_encode(['meta' => ['entity' => ResponseDescriptor::class , 'pagination' => ['total' => 42]]]));
+        $response->setBody(json_encode(['meta' => ['entity' => ResponseDescriptor::class, 'pagination' => ['total' => 42]]]));
 
         $this->assertEquals(ResponseDescriptor::class, $response->getMeta('entity'));
-        $this->assertEquals(['entity' => ResponseDescriptor::class , 'pagination' => ['total' => 42]], $response->getMeta());
+        $this->assertEquals(['entity' => ResponseDescriptor::class, 'pagination' => ['total' => 42]], $response->getMeta());
 
     }
 }

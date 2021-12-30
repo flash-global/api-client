@@ -48,11 +48,14 @@ class ApiClientExceptionTest extends TestCase
             ->getMock();
 
         $exception = new ApiClientException('message', 0, $requestException);
+        $requestExceptionReflection = (new \ReflectionObject($exception))->getProperty('requestException');
+        $requestExceptionReflection->setAccessible(true);
 
-        $this->assertAttributeEquals(null, 'requestException', $exception);
+        $this->assertSame(null, $requestExceptionReflection->getValue($exception));
 
         $this->assertEquals($requestException, $exception->getRequestException());
-        $this->assertAttributeEquals($requestException, 'requestException', $exception);
+        $this->assertSame($requestException, $requestExceptionReflection->getValue($exception));
+
 
         $this->assertEquals($requestException, $exception->getRequestException());
     }

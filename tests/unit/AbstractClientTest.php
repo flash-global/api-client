@@ -25,7 +25,8 @@ class ClientTest extends Unit
     public function testTransportAccessors()
     {
         $client = new TestClient();
-
+        $reflectedTransport = (new \ReflectionObject($client))->getProperty('transport');
+        $reflectedTransport->setAccessible(true);
         $this->assertNull($client->getTransport());
 
         $transport = $this->createMock(SyncTransportInterface::class);
@@ -33,13 +34,14 @@ class ClientTest extends Unit
         $client->setTransport($transport);
 
         $this->assertSame($transport, $client->getTransport());
-        $this->assertAttributeSame($transport, 'transport', $client);
+        $this->assertSame($transport, $reflectedTransport->getValue($client));
     }
 
     public function testAsyncTransportAccessors()
     {
         $client = new TestClient();
-
+        $reflectedAsyncTransport = (new \ReflectionObject($client))->getProperty('asyncTransport');
+        $reflectedAsyncTransport->setAccessible(true);
         $this->assertNull($client->getAsyncTransport());
 
         $transport = $this->createMock(AsyncTransportInterface::class);
@@ -47,7 +49,7 @@ class ClientTest extends Unit
         $client->setAsyncTransport($transport);
 
         $this->assertSame($transport, $client->getAsyncTransport());
-        $this->assertAttributeSame($transport, 'asyncTransport', $client);
+        $this->assertSame($transport, $reflectedAsyncTransport->getValue($client));
     }
 
     public function testBaseUrlAccessors()
@@ -67,9 +69,13 @@ class ClientTest extends Unit
 
         // PREPARE
         $client = new TestClient();
+        $delayNext = (new \ReflectionObject($client))->getProperty('delayNext');
+        $delayNext->setAccessible(true);
+        $delayedRequests = (new \ReflectionObject($client))->getProperty('delayedRequests');
+        $delayedRequests->setAccessible(true);
 
         // ASSERT
-        $this->assertAttributeSame(false, 'delayNext', $client);
+        $this->assertSame(false, $delayNext->getValue($client));
 
         // RUN
 
@@ -77,7 +83,7 @@ class ClientTest extends Unit
 
         // ASSERT
         $this->assertSame($fluent, $client);
-        $this->assertAttributeSame(true, 'delayNext', $client);
+        $this->assertSame(true, $delayNext->getValue($client));
 
         // PREPARE
         $request = $this->createMock(RequestDescriptor::class);
@@ -89,8 +95,8 @@ class ClientTest extends Unit
         $client->send($request);
 
         // ASSERT
-        $this->assertAttributeEquals(false, 'delayNext', $client);
-        $this->assertAttributeEquals([[$request, ApiRequestOption::NO_RESPONSE]], 'delayedRequests', $client);
+        $this->assertEquals(false, $delayNext->getValue($client));
+        $this->assertEquals([[$request, ApiRequestOption::NO_RESPONSE]], $delayedRequests->getValue($client));
     }
 
     public function testSendMethodProxiesCallToTransportSendMethod()
@@ -155,19 +161,21 @@ class ClientTest extends Unit
     public function testBeginStartsATransaction()
     {
         $client = new TestClient();
-
-        $this->assertAttributeSame(false, 'isDelayed', $client);
+        $isDelayed = (new \ReflectionObject($client))->getProperty('isDelayed');
+        $isDelayed->setAccessible(true);
+        $delayedRequests = (new \ReflectionObject($client))->getProperty('delayedRequests');
+        $delayedRequests->setAccessible(true);
+        $this->assertSame(false, $isDelayed->getValue($client));
 
         $fluent = $client->begin();
 
         $this->assertSame($fluent, $client);
-        $this->assertAttributeSame(true, 'isDelayed', $client);
+        $this->assertSame(true, $isDelayed->getValue($client));
 
         $request = $this->createMock(RequestDescriptor::class);
 
         $client->send($request);
-        $this->assertAttributeEquals([[$request, ApiRequestOption::NO_RESPONSE]], 'delayedRequests', $client);
-
+        $this->assertEquals([[$request, ApiRequestOption::NO_RESPONSE]], $delayedRequests->getValue($client));
         return $client;
     }
 
@@ -216,14 +224,19 @@ class ClientTest extends Unit
     public function testRollbackResetDelayedRequestsAndStatus()
     {
         $client = new TestClient();
+        $isDelayed = (new \ReflectionObject($client))->getProperty('isDelayed');
+        $isDelayed->setAccessible(true);
+        $delayedRequests = (new \ReflectionObject($client))->getProperty('delayedRequests');
+        $delayedRequests->setAccessible(true);
         $client->begin();
         $request = $this->createMock(RequestDescriptor::class);
         $client->send($request);
 
         $fluent = $client->rollback();
 
-        $this->assertAttributeSame(false, 'isDelayed', $client);
-        $this->assertAttributeEquals([], 'delayedRequests', $client);
+        $this->assertSame(false, $isDelayed->getValue($client));
+        $this->assertEquals([], $delayedRequests->getValue($client));
+
         $this->assertSame($fluent, $client);
     }
 
@@ -233,6 +246,10 @@ class ClientTest extends Unit
     public function testCommitResetDelayedRequestsAndStatus()
     {
         $client = new TestClient();
+        $isDelayed = (new \ReflectionObject($client))->getProperty('isDelayed');
+        $isDelayed->setAccessible(true);
+        $delayedRequests = (new \ReflectionObject($client))->getProperty('delayedRequests');
+        $delayedRequests->setAccessible(true);
         $client->begin();
         $request = $this->createMock(RequestDescriptor::class);
         $request2 = $this->createMock(RequestDescriptor::class);
@@ -246,8 +263,8 @@ class ClientTest extends Unit
 
         $fluent = $client->commit();
 
-        $this->assertAttributeSame(false, 'isDelayed', $client);
-        $this->assertAttributeEquals([], 'delayedRequests', $client);
+        $this->assertSame(false, $isDelayed->getValue($client));
+        $this->assertEquals([], $delayedRequests->getValue($client));
         $this->assertSame($fluent, $client);
     }
 
@@ -256,18 +273,22 @@ class ClientTest extends Unit
     {
         /** @var AbstractApiClient $client */
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [], '', true, true, true, ['commit']);
-
+        $isDelayed = (new \ReflectionObject($client))->getProperty('isDelayed');
+        $isDelayed->setAccessible(true);
         $client->enableAutoCommit();
-        $this->assertAttributeEquals(true, 'isDelayed', $client);
+        $this->assertEquals(true, $isDelayed->getValue($client));
     }
 
     public function testForceSendingARequest()
     {
         /** @var AbstractApiClient $client */
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [], '', true, true, true, ['commit']);
-
-        $this->assertAttributeEquals(false, 'forceNext', $client);
-        $this->assertAttributeEquals(false, 'delayNext', $client);
+        $forceNext = (new \ReflectionObject($client))->getProperty('forceNext');
+        $forceNext->setAccessible(true);
+        $delayNext = (new \ReflectionObject($client))->getProperty('delayNext');
+        $delayNext->setAccessible(true);
+        $this->assertSame(false, $forceNext->getValue($client));
+        $this->assertSame(false, $delayNext->getValue($client));
 
 
         $transport = $this->createMock(SyncTransportInterface::class);
@@ -280,24 +301,23 @@ class ClientTest extends Unit
 
         // should call send
         $client->begin()->force();
-        $this->assertAttributeEquals(true, 'forceNext', $client);
+        $this->assertEquals(true, $forceNext->getValue($client));
 
         $client->send(new RequestDescriptor());
-        $this->assertAttributeEquals(false, 'forceNext', $client);
-
+        $this->assertEquals(false, $forceNext->getValue($client));
         // check there is no interference between delay and force
         $client->delay();
-        $this->assertAttributeEquals(true, 'delayNext', $client);
+        $this->assertEquals(true, $delayNext->getValue($client));
 
         // activating "force" should reset "delay"
         $client->force();
-        $this->assertAttributeEquals(false, 'delayNext', $client);
-        $this->assertAttributeEquals(true, 'forceNext', $client);
+        $this->assertEquals(false, $delayNext->getValue($client));
+        $this->assertEquals(true, $forceNext->getValue($client));
 
         // and vice-versa
         $client->delay();
-        $this->assertAttributeEquals(true, 'delayNext', $client);
-        $this->assertAttributeEquals(false, 'forceNext', $client);
+        $this->assertEquals(true, $delayNext->getValue($client));
+        $this->assertEquals(false, $forceNext->getValue($client));
     }
 
     public function testOptionsHandling()
@@ -308,12 +328,16 @@ class ClientTest extends Unit
         ];
         /** @var AbstractApiClient $client */
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [$optionsValue], '', true, true, true, ['commit']);
+        $baseUrl = (new \ReflectionObject($client))->getProperty('baseUrl');
+        $baseUrl->setAccessible(true);
+        $authorization = (new \ReflectionObject($client))->getProperty('authorization');
+        $authorization->setAccessible(true);
 
-        $this->assertAttributeEquals('http://base-url.com/', 'baseUrl', $client);
+        $this->assertEquals('http://base-url.com/', $baseUrl->getValue($client));
         $this->assertEquals('http://base-url.com/', $client->getBaseUrl());
         $this->assertEquals('http://base-url.com/', $client->getOption(AbstractApiClient::OPTION_BASEURL));
 
-        $this->assertAttributeEquals('authorizationHeaderValue', 'authorization', $client);
+        $this->assertEquals('authorizationHeaderValue', $authorization->getValue($client));
         $this->assertEquals('authorizationHeaderValue', $client->getAuthorization());
         $this->assertEquals('authorizationHeaderValue', $client->getOption(AbstractApiClient::OPTION_HEADER_AUTHORIZATION));
     }
@@ -321,10 +345,14 @@ class ClientTest extends Unit
     public function testOptionsInitialization()
     {
         $client = $this->getMockForAbstractClass(AbstractApiClient::class, [[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']], '', true, true, true, ['commit']);
-        $this->assertAttributeEquals(['baseUrl', 'Authorization'], 'availableOptions', $client);
+        $availableOptions = (new \ReflectionObject($client))->getProperty('availableOptions');
+        $availableOptions->setAccessible(true);
+        $this->assertEquals(['baseUrl', 'Authorization'], $availableOptions->getValue($client));
 
         $client = new TestClient();
-        $this->assertAttributeEquals(['testOption', 'baseUrl', 'Authorization'], 'availableOptions', $client);
+        $availableOptions = (new \ReflectionObject($client))->getProperty('availableOptions');
+        $availableOptions->setAccessible(true);
+        $this->assertEquals(['testOption', 'baseUrl', 'Authorization'], $availableOptions->getValue($client));
     }
 
     public function testSettingUnknownOptionThrowsAnException()

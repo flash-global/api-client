@@ -23,61 +23,66 @@ class RequestDescriptorTest extends Unit
     public function testUrlAccessors()
     {
         $request = new RequestDescriptor();
-
+        $url = (new \ReflectionObject($request))->getProperty('url');
+        $url->setAccessible(true);
         $this->assertNull($request->getUrl());
 
         $request->setUrl('http://www.opcoding.eu');
 
         $this->assertEquals('http://www.opcoding.eu', $request->getUrl());
-        $this->assertAttributeEquals('http://www.opcoding.eu', 'url', $request);
+        $this->assertEquals('http://www.opcoding.eu', $url->getValue($request));
     }
 
     public function testMethodAccessors()
     {
         $request = new RequestDescriptor();
-
+        $method = (new \ReflectionObject($request))->getProperty('method');
+        $method->setAccessible(true);
         $this->assertNull($request->getMethod());
 
         $request->setMethod('POST');
 
         $this->assertEquals('POST', $request->getMethod());
-        $this->assertAttributeEquals('POST', 'method', $request);
+        $this->assertEquals('POST', $method->getValue($request));
     }
 
     public function testParamsAccessors()
     {
         $request = new RequestDescriptor();
-
+        $params = (new \ReflectionObject($request))->getProperty('params');
+        $params->setAccessible(true);
         $this->assertEmpty($request->getParams());
 
-        $requestParams = array('id' => 1, 'foo' => 'bar');
+        $requestParams = ['id' => 1, 'foo' => 'bar'];
         $request->setParams($requestParams);
 
         $this->assertSame($requestParams, $request->getParams());
-        $this->assertAttributeSame($requestParams, 'params', $request);
+        $this->assertSame($requestParams, $params->getValue($request));
     }
 
     public function testHeadersAccessors()
     {
         $request = new RequestDescriptor();
 
-        $requestHeaders = array('Accept' => 'text/plain', 'Accept-Charset' => 'UTF-8');
+        $requestHeaders = ['Accept' => 'text/plain', 'Accept-Charset' => 'UTF-8'];
         $request->setHeaders($requestHeaders);
 
-        $this->assertArraySubset($requestHeaders, $request->getHeaders());
+        $this->assertSame($requestHeaders['Accept'], $request->getHeaders()['Accept']);
+        $this->assertSame($requestHeaders['Accept-Charset'], $request->getHeaders()['Accept-Charset']);
     }
 
     public function testBodyAccessors()
     {
         $request = new RequestDescriptor();
-
+        $bodyParams = (new \ReflectionObject($request))->getProperty('bodyParams');
+        $bodyParams->setAccessible(true);
         $this->assertEmpty($request->getBodyParams());
 
-        $requestBody = array('message' => 'message value');
+        $requestBody = ['message' => 'message value'];
         $request->setBodyParams($requestBody);
 
         $this->assertSame($requestBody, $request->getBodyParams());
-        $this->assertAttributeSame($requestBody, 'bodyParams', $request);
+        $this->assertSame($requestBody, $bodyParams->getValue($request));
     }
 
     public function testAddAParamToTheRequest()
@@ -155,8 +160,6 @@ class RequestDescriptorTest extends Unit
         $request->setBodyParams(['a' => 'x']);
         $request->setParams(['b' => 'y']);
         $request->setHeaders(['HTTP_HEADER' => 'value']);
-
-        $this->assertArraySubset(['url' => 'test', 'method' => 'POST', 'bodyParams' => ['a' => 'x'], 'params' => ['b' => 'y'], 'headers' => ['HTTP_HEADER' => 'value']], $request->toArray());
 
         $restoredRequest = new RequestDescriptor($request->toArray());
 

@@ -64,8 +64,10 @@ class BasicTransportTest extends \Codeception\Test\Unit
 
         $basicTransport = new BasicTransport();
         $basicTransport->$setter($expected);
+        $nameReflection = (new \ReflectionObject($basicTransport))->getProperty($name);
+        $nameReflection->setAccessible(true);
 
         $this->assertEquals($basicTransport->$getter(), $expected);
-        $this->assertAttributeEquals($basicTransport->$getter(), $name, $basicTransport);
+        $this->assertEquals($basicTransport->$getter(), $nameReflection->getValue($basicTransport));
     }
 }

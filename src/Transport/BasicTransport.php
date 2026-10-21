@@ -80,7 +80,7 @@ class BasicTransport implements SyncTransportInterface
                 $requests[] = $this->getClient()->sendAsync($this->getRequestFactory()->create($request));
             }
 
-            return \GuzzleHttp\Promise\unwrap($requests);
+            return \GuzzleHttp\Promise\Utils::unwrap($requests);
         } catch (\Exception $exception) {
             throw new ApiClientException('An error occurred while transporting a request', $exception->getCode(), $exception);
         }

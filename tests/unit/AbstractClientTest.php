@@ -272,7 +272,7 @@ class ClientTest extends Unit
     public function testAutoCommit()
     {
         /** @var AbstractApiClient $client */
-        $client = $this->getMockForAbstractClass(AbstractApiClient::class, [], '', true, true, true, ['commit']);
+        $client = $this->getMockBuilder(PlainTestClient::class)->setConstructorArgs([])->onlyMethods(['commit'])->getMock();
         $isDelayed = (new \ReflectionObject($client))->getProperty('isDelayed');
         $isDelayed->setAccessible(true);
         $client->enableAutoCommit();
@@ -282,7 +282,7 @@ class ClientTest extends Unit
     public function testForceSendingARequest()
     {
         /** @var AbstractApiClient $client */
-        $client = $this->getMockForAbstractClass(AbstractApiClient::class, [], '', true, true, true, ['commit']);
+        $client = $this->getMockBuilder(PlainTestClient::class)->setConstructorArgs([])->onlyMethods(['commit'])->getMock();
         $forceNext = (new \ReflectionObject($client))->getProperty('forceNext');
         $forceNext->setAccessible(true);
         $delayNext = (new \ReflectionObject($client))->getProperty('delayNext');
@@ -327,7 +327,7 @@ class ClientTest extends Unit
             AbstractApiClient::OPTION_HEADER_AUTHORIZATION => 'authorizationHeaderValue'
         ];
         /** @var AbstractApiClient $client */
-        $client = $this->getMockForAbstractClass(AbstractApiClient::class, [$optionsValue], '', true, true, true, ['commit']);
+        $client = $this->getMockBuilder(PlainTestClient::class)->setConstructorArgs([$optionsValue])->onlyMethods(['commit'])->getMock();
         $baseUrl = (new \ReflectionObject($client))->getProperty('baseUrl');
         $baseUrl->setAccessible(true);
         $authorization = (new \ReflectionObject($client))->getProperty('authorization');
@@ -344,7 +344,7 @@ class ClientTest extends Unit
 
     public function testOptionsInitialization()
     {
-        $client = $this->getMockForAbstractClass(AbstractApiClient::class, [[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']], '', true, true, true, ['commit']);
+        $client = $this->getMockBuilder(PlainTestClient::class)->setConstructorArgs([[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']])->onlyMethods(['commit'])->getMock();
         $availableOptions = (new \ReflectionObject($client))->getProperty('availableOptions');
         $availableOptions->setAccessible(true);
         $this->assertEquals(['baseUrl', 'Authorization'], $availableOptions->getValue($client));
@@ -360,7 +360,7 @@ class ClientTest extends Unit
         /**
          * @var $client AbstractApiClient
          */
-        $client = $this->getMockForAbstractClass(AbstractApiClient::class, [[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']], '', true, true, true, ['commit']);
+        $client = $this->getMockBuilder(PlainTestClient::class)->setConstructorArgs([[AbstractApiClient::OPTION_BASEURL => 'http://base-url.com']])->onlyMethods(['commit'])->getMock();
         $this->expectException(ApiClientException::class);
 
         $client->setOption('unkownOption', 'any value');
@@ -425,6 +425,10 @@ class ClientTest extends Unit
 class TestClient extends AbstractApiClient
 {
     const OPTION_TEST = 'testOption';
+}
+
+class PlainTestClient extends AbstractApiClient
+{
 }
 
 class TestEntity extends AbstractEntity

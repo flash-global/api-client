@@ -26,7 +26,7 @@ class ApiClientException extends \Exception
             return $this->requestException;
         }
 
-        $search = function (\Exception $exception = null) use (&$search) {
+        $search = function (?\Exception $exception = null) use (&$search) {
             $previous = $exception->getPrevious();
 
             if (is_null($previous)) {

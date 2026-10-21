@@ -350,7 +350,7 @@ abstract class AbstractApiClient implements ApiClientInterface
         $transport = $this->getAppropriateTransport($flags);
 
         if (is_null($transport)) {
-            throw new ApiClientException(sprintf('No transport has been set on "%s"', get_class()));
+            throw new ApiClientException(sprintf('No transport has been set on "%s"', self::class));
         }
 
         try {

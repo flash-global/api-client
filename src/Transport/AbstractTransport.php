@@ -77,6 +77,6 @@ abstract class AbstractTransport implements TransportInterface
             return $this;
         }
 
-        throw new ApiClientException(sprintf('Trying to set unknown option "%s" on %s ', $option, get_class()));
+        throw new ApiClientException(sprintf('Trying to set unknown option "%s" on %s ', $option, self::class));
     }
 }

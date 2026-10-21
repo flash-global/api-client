@@ -13,6 +13,9 @@
   "config": {
     "platform": {
       "php": "8.5.0"
+    },
+    "allow-plugins": {
+      "phpro/grumphp": true
     }
   },
   "require": {

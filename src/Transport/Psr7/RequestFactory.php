@@ -38,7 +38,7 @@ class RequestFactory
     {
         return new Request(
             $descriptor->getMethod(),
-            $descriptor->getUrl(),
+            (string) $descriptor->getUrl(),
             $descriptor->getHeaders()
         );
     }
@@ -56,7 +56,7 @@ class RequestFactory
         
         $request = new Request(
             $descriptor->getMethod(),
-            $descriptor->getUrl(),
+            (string) $descriptor->getUrl(),
             $descriptor->getHeaders(),
             $descriptor->fetchBody()
         );
@@ -73,7 +73,7 @@ class RequestFactory
     {
         return new Request(
             $descriptor->getMethod(),
-            $descriptor->getUrl(),
+            (string) $descriptor->getUrl(),
             $descriptor->getHeaders(),
             $descriptor->fetchBody()
         );

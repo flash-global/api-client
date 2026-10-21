@@ -25,7 +25,7 @@ class BasicTransportTest extends \Codeception\Test\Unit
 
 
 
-        $factoryMock = $this->getMockBuilder(RequestFactory::class)->setMethods(['create'])->getMock();
+        $factoryMock = $this->getMockBuilder(RequestFactory::class)->onlyMethods(['create'])->getMock();
 
         $response = new Response(200, [], '{"code": 10, "data": {"key": "value"}}');
         $client = $this->createMock(Client::class);

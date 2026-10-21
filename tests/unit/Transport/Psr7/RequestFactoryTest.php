@@ -15,7 +15,7 @@ class RequestFactoryTest extends \Codeception\Test\Unit
     public function testCreate($method)
     {
 
-        $requestDescriptorMock = $this->getMockBuilder(RequestDescriptor::class)->setMethods(['getMethod', 'getBodyParams'])->getMock();
+        $requestDescriptorMock = $this->getMockBuilder(RequestDescriptor::class)->onlyMethods(['getMethod', 'getBodyParams'])->getMock();
         $requestDescriptorMock->expects($this->any())->method('getMethod')->willReturn($method);
         $requestDescriptorMock->expects($this->any())->method('getBodyParams')->willReturn(['toto' => 'titi']);
 
@@ -23,7 +23,7 @@ class RequestFactoryTest extends \Codeception\Test\Unit
         $this->assertInstanceOf(RequestInterface::class, $requestFactory->create($requestDescriptorMock));
     }
 
-    public function methodProvider()
+    public static function methodProvider()
     {
         return [
             ['GET'],

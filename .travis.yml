@@ -1,7 +1,7 @@
 language: php
 
 php:
-  - 8.0
+  - 8.5
 
 import:
   - source: flash-global/travis-public:common.yml@master
